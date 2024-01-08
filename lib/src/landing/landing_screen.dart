@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_portfolio_app/src/android.dart';
 
 class LandingScreen extends StatefulWidget {
   static String id = 'LandingScreen';
@@ -12,14 +13,6 @@ class LandingScreen extends StatefulWidget {
 class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Center(
-          child: Text('Landing Page'),
-        ),
-      ),
-    );
+    return const AndroidUI();
   }
 }

@@ -21,6 +21,18 @@ var boxShadow = const BoxShadow(
   offset: Offset(0, 1),
 );
 
+var jumboText = const TextStyle(
+  color: CustomColor.whito,
+  fontSize: 26,
+  fontWeight: FontWeight.bold,
+);
+
+var bigText = const TextStyle(
+  color: CustomColor.whito,
+  fontSize: 18,
+  fontWeight: FontWeight.bold,
+);
+
 var h1 = const TextStyle(
   color: CustomColor.bluoDark,
   fontSize: 18,
@@ -28,13 +40,13 @@ var h1 = const TextStyle(
 );
 
 var h2 = const TextStyle(
-  color: CustomColor.bluoDark,
+  color: CustomColor.whito,
   fontSize: 16,
   fontWeight: FontWeight.bold,
 );
 
 var h3 = const TextStyle(
-  color: CustomColor.bluoDark,
+  color: CustomColor.whito,
   fontSize: 14,
   fontWeight: FontWeight.w600,
 );
@@ -46,7 +58,7 @@ var h4 = const TextStyle(
 );
 
 var textMedium = const TextStyle(
-  color: CustomColor.greoDark,
+  color: CustomColor.whito,
   fontSize: 12,
   fontWeight: FontWeight.w500,
 );
