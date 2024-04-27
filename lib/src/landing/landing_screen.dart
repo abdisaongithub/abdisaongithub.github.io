@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/src/android.dart';
+import 'package:flutter_portfolio_app/src/ios.dart';
 
 class LandingScreen extends StatefulWidget {
   static String id = 'LandingScreen';
@@ -16,8 +17,8 @@ class LandingScreen extends StatefulWidget {
 class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.linux) {
-      return const AndroidUI();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return const IOSUI();
     } else if (Platform.isIOS) {
       return Scaffold(
         body: Container(
@@ -70,6 +71,8 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
         ),
       );
+    } else if (Platform.isAndroid) {
+      return const AndroidUI();
     }
     return Scaffold(
       body: Container(
@@ -79,7 +82,7 @@ class _LandingScreenState extends State<LandingScreen> {
           color: Colors.white,
         ),
         child: const Center(
-          child: Text("Could not find OS"),
+          child: Text("Could not find OS App"),
         ),
       ),
     );

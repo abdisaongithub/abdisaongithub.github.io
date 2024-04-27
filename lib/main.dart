@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import 'network/api_client.dart';
@@ -19,8 +19,8 @@ Future<void> main() async {
 void _setupApiClient() {
   final apiClient = ApiClientImpl(Dio());
   GetIt.I.registerSingleton<ApiClient>(apiClient as ApiClient);
-  final credentialStorage = SecureCredentialsStorage(
-    const FlutterSecureStorage(),
-  );
-  GetIt.I.registerSingleton<SecureCredentialsStorage>(credentialStorage);
+  // final credentialStorage = SecureCredentialsStorage(
+  //   const FlutterSecureStorage(),
+  // );
+  // GetIt.I.registerSingleton<SecureCredentialsStorage>(credentialStorage);
 }

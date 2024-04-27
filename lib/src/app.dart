@@ -18,7 +18,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final apiClient = GetIt.I<ApiClient>();
-    final credentialStorage = GetIt.I<SecureCredentialsStorage>();
+    // final credentialStorage = GetIt.I<SecureCredentialsStorage>();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
