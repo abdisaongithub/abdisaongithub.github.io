@@ -1,26 +1,39 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_it/get_it.dart';
-
-import 'network/api_client.dart';
-import 'network/api_client_impl.dart';
-import 'src/app.dart';
-import 'util/SecureCredentials/secure_credential_storage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+// If desktop
+import 'main_orchestrator.dart';
+import 'features/os_mode/cubit/os_mode_cubit.dart';
+import 'features/virtual_window/cubit/window_manager_cubit.dart';
 
 Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  _setupApiClient();
-  runApp(const App());
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    // await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Silent catch for prototype
+  }
+
+  // Initialize window manager for actual desktop window behavior (optional)
+  // await windowManager.ensureInitialized();
+
+  runApp(const PortfolioApp());
 }
 
-void _setupApiClient() {
-  final apiClient = ApiClientImpl(Dio());
-  GetIt.I.registerSingleton<ApiClient>(apiClient as ApiClient);
-  // final credentialStorage = SecureCredentialsStorage(
-  //   const FlutterSecureStorage(),
-  // );
-  // GetIt.I.registerSingleton<SecureCredentialsStorage>(credentialStorage);
+class PortfolioApp extends StatelessWidget {
+  const PortfolioApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => OSModeCubit()),
+        BlocProvider(create: (_) => WindowManagerCubit()),
+      ],
+      child: const MaterialApp(
+        title: 'Abdisa Portfolio',
+        debugShowCheckedModeBanner: false,
+        home: MainOrchestrator(),
+      ),
+    );
+  }
 }

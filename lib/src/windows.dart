@@ -1,12 +1,6 @@
-import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart' as fl;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_portfolio_app/util/launcher.dart';
 import 'package:flutter_portfolio_app/util/style_constant.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -134,7 +128,7 @@ class _WindowsUIState extends State<WindowsUI> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Container(
+                      SizedBox(
                         width: containerWidth,
                         child: Column(
                           children: [

@@ -25,7 +25,7 @@ class Util {
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.white,
-        margin: EdgeInsets.only(left: 20, right: 20, bottom: 80),
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 80),
         // width: MediaQuery.of(context).size.width * 0.9,
         content: Container(
           width: MediaQuery.of(context).size.width * 0.9,

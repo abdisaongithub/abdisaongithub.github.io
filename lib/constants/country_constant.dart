@@ -34,22 +34,46 @@ class CountryCode {
         countryName: "Albania",
         countryCode: "+355",
       ),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-austria-circle.svg", countryName: "Austria", countryCode: "+43"),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-france-circle.svg", countryName: "France", countryCode: "+33"),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-germany-circle.svg", countryName: "Germany", countryCode: "+49"),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-italy-circle.svg", countryName: "Italia", countryCode: "+39"),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-kosovo-circle.svg", countryName: "Kosovo", countryCode: "+383"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-austria-circle.svg",
+          countryName: "Austria",
+          countryCode: "+43"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-france-circle.svg",
+          countryName: "France",
+          countryCode: "+33"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-germany-circle.svg",
+          countryName: "Germany",
+          countryCode: "+49"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-italy-circle.svg",
+          countryName: "Italia",
+          countryCode: "+39"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-kosovo-circle.svg",
+          countryName: "Kosovo",
+          countryCode: "+383"),
       CountryCode(
           flagPath: "${flagBasePath}icon-flag-northmacedonia-circle.svg",
           countryName: "North Macedonia",
           countryCode: "+389"),
       CountryCode(
-          flagPath: "${flagBasePath}icon-flag-switzerland-circle.svg", countryName: "Switzerland", countryCode: "+41"),
-      CountryCode(flagPath: "${flagBasePath}icon-flag-turkey-circle.svg", countryName: "Turkey", countryCode: "+90"),
+          flagPath: "${flagBasePath}icon-flag-switzerland-circle.svg",
+          countryName: "Switzerland",
+          countryCode: "+41"),
       CountryCode(
-          flagPath: "${flagBasePath}icon-flag-uk-circle.svg", countryName: "United Kingdom", countryCode: "+44"),
+          flagPath: "${flagBasePath}icon-flag-turkey-circle.svg",
+          countryName: "Turkey",
+          countryCode: "+90"),
       CountryCode(
-          flagPath: "${flagBasePath}icon-flag-ethiopia-circle.svg", countryName: "Ethiopia", countryCode: "+251"),
+          flagPath: "${flagBasePath}icon-flag-uk-circle.svg",
+          countryName: "United Kingdom",
+          countryCode: "+44"),
+      CountryCode(
+          flagPath: "${flagBasePath}icon-flag-ethiopia-circle.svg",
+          countryName: "Ethiopia",
+          countryCode: "+251"),
     ];
   }
 
@@ -64,14 +88,14 @@ class CountryCode {
 
   @override
   bool operator ==(Object other) {
-    return other is CountryCode &&
-        countryCode == other.countryCode &&
-        countryName == other.countryCode &&
-        flagPath == other.flagPath;
+    return identical(this, other) ||
+        other is CountryCode &&
+            countryCode == other.countryCode &&
+            countryName == other.countryName &&
+            flagPath == other.flagPath;
   }
 
   @override
-  int get hashCode {
-    return super.hashCode;
-  }
+  int get hashCode =>
+      countryCode.hashCode ^ countryName.hashCode ^ flagPath.hashCode;
 }

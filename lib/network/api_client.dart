@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:image_picker/image_picker.dart';
 
-import 'core/core.dart';
 
 abstract class ApiClient {
   final Dio _dio;

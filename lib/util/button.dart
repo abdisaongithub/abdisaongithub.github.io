@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'color.dart';
 import 'style_constant.dart';
@@ -69,8 +68,8 @@ class TederaTextButton extends StatelessWidget {
       // TODO
       onPressed: onPressed,
       style: ButtonStyle(
-        overlayColor: MaterialStateColor.resolveWith((states) => Colors.black.withOpacity(0.05)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        overlayColor: WidgetStateColor.resolveWith((states) => Colors.black.withOpacity(0.05)),
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
             // side: const BorderSide(color: Colors.red),

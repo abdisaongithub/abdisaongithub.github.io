@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_portfolio_app/util/color.dart';
 import 'package:flutter_portfolio_app/util/launcher.dart';
 import 'package:flutter_portfolio_app/util/style_constant.dart';
 import 'package:flutter_svg/svg.dart';
