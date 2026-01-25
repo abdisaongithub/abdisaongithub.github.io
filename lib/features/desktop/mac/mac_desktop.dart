@@ -21,8 +21,7 @@ class MacDesktop extends StatelessWidget {
               child: Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage(
-                        'assets/images/ios_wallpaper.jpg'), // Using provided mac/ios wallpaper
+                    image: AssetImage('assets/images/macos_wallpaper.png'),
                     fit: BoxFit.cover,
                   ),
                 ),

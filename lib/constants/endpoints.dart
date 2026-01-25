@@ -1,8 +1,8 @@
-
-
 import '../util/credentials.dart';
 
-final serverUrl = 'https://${Credentials.baseUrl}';
+//final serverUrl = 'https://${Credentials.baseUrl}';
+
+final serverUrl = 'http://localhost:4000';
 
 class AuthEndpoint {
   static String base = '$serverUrl/v1/user';
