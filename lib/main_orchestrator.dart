@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/os_mode/cubit/os_mode_cubit.dart';
@@ -8,39 +9,96 @@ import 'features/desktop/mac/mac_desktop.dart';
 import 'features/desktop/linux/linux_desktop.dart';
 import 'features/mobile/android/android_launcher.dart';
 import 'features/mobile/ios/ios_launcher.dart';
+import 'features/web/web_launcher.dart';
 import 'features/switcher/os_switcher_widget.dart';
 
-class MainOrchestrator extends StatelessWidget {
+class MainOrchestrator extends StatefulWidget {
   const MainOrchestrator({super.key});
+
+  @override
+  State<MainOrchestrator> createState() => _MainOrchestratorState();
+}
+
+class _MainOrchestratorState extends State<MainOrchestrator> {
+  bool? _lastIsPortrait;
+
+  void _handleAdaptiveSwitch(BuildContext context, BoxConstraints constraints,
+      OSModeState currentState) {
+    final isPortrait = constraints.maxHeight > constraints.maxWidth;
+
+    // Detect orientation change and reset manual flag if it changed
+    if (_lastIsPortrait != null && _lastIsPortrait != isPortrait) {
+      if (currentState.isManual) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context
+              .read<OSModeCubit>()
+              .setMode(currentState.mode, isManual: false);
+        });
+      }
+    }
+    _lastIsPortrait = isPortrait;
+
+    if (currentState.isManual)
+      return; // Don't override OS if user manually set it
+
+    if (isPortrait) {
+      if (currentState.mode != OSMode.android &&
+          currentState.mode != OSMode.ios) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<OSModeCubit>().setMode(OSMode.ios, isManual: false);
+        });
+      }
+    } else {
+      if (currentState.mode == OSMode.android ||
+          currentState.mode == OSMode.ios) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<OSModeCubit>().setMode(OSMode.macos, isManual: false);
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OSModeCubit, OSModeState>(
       builder: (context, state) {
-        // Note: For now Android and iOS are the ones we'll force simulate.
-        final shouldSimulateMobile =
-            state.mode == OSMode.android || state.mode == OSMode.ios;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            _handleAdaptiveSwitch(context, constraints, state);
 
-        return Scaffold(
-          body: Stack(
-            children: [
-              // 1. The active OS Content
-              if (shouldSimulateMobile)
-                _buildMobileSimulator(context, state.mode)
-              else
-                _buildBGLayer(state.mode),
+            final isPortrait = constraints.maxHeight > constraints.maxWidth;
+            final isMobileMode =
+                state.mode == OSMode.android || state.mode == OSMode.ios;
 
-              // 2. Full Screen Toggle (Top Right)
-              Positioned(
-                top: 40,
-                right: 20,
-                child: _FullScreenToggle(),
+            // Enforce simulation if:
+            // 1. It's a mobile mode AND user manually selected it.
+            // 2. OR it's a mobile mode AND we are in Landscape.
+            final shouldShowSimulator =
+                isMobileMode && (state.isManual || !isPortrait);
+
+            return Scaffold(
+              body: Stack(
+                children: [
+                  // 1. The active OS Content
+                  if (shouldShowSimulator)
+                    _buildMobileSimulator(context, state.mode)
+                  else
+                    _buildBGLayer(state.mode),
+
+                  // 2. Full Screen Toggle (Top Right)
+                  if (!isPortrait) // Hide in portrait to maximize space
+                    Positioned(
+                      top: 40,
+                      right: 20,
+                      child: _FullScreenToggle(),
+                    ),
+
+                  // 3. The Global Switcher
+                  const OSSwitcherWidget(),
+                ],
               ),
-
-              // 3. The Global Switcher
-              const OSSwitcherWidget(),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -57,8 +115,6 @@ class MainOrchestrator extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(48), // Smoother premium corners
-            border:
-                Border.all(color: const Color(0xFF1F1F1F), width: 12), // Bezel
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.8),
@@ -67,6 +123,11 @@ class MainOrchestrator extends StatelessWidget {
               ),
             ],
           ),
+          foregroundDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(48),
+            border:
+                Border.all(color: const Color(0xFF1F1F1F), width: 12), // Bezel
+          ),
           child: Stack(
             children: [
               _buildBGLayer(mode),
@@ -74,7 +135,7 @@ class MainOrchestrator extends StatelessWidget {
               Align(
                 alignment: Alignment.topCenter,
                 child: Container(
-                  margin: const EdgeInsets.top(8),
+                  margin: const EdgeInsets.only(top: 8),
                   width: 120,
                   height: 28,
                   decoration: BoxDecoration(
@@ -103,12 +164,7 @@ class MainOrchestrator extends StatelessWidget {
       case OSMode.ios:
         return const IosLauncher();
       case OSMode.web:
-        return const Center(
-          child: Text(
-            "Web Mode (Coming Soon)",
-            style: TextStyle(color: Colors.white, fontSize: 24),
-          ),
-        );
+        return const WebLauncher();
     }
   }
 }
@@ -123,9 +179,15 @@ class _FullScreenToggleState extends State<_FullScreenToggle> {
 
   void _toggleFullScreen() {
     setState(() => _isFullScreen = !_isFullScreen);
-    // In a real web app, we'd use dart:html document.documentElement.requestFullscreen()
-    // For this prototype, we'll just toggle the icon to show we're "handling" it.
-    // print("Toggle FullScreen: $_isFullScreen");
+    try {
+      if (_isFullScreen) {
+        html.document.documentElement?.requestFullscreen();
+      } else {
+        html.document.exitFullscreen();
+      }
+    } catch (e) {
+      debugPrint("Full screen error: $e");
+    }
   }
 
   @override

@@ -1,7 +1,8 @@
 import 'credentials.dart';
 
 class APIs {
-  static final baseMedia = 'https://${Credentials.baseUrl}';
+  // static final baseMedia = 'https://${Credentials.baseUrl}';
+  static final baseMedia = 'http://localhost:4000';
   static const login = 'user/login';
   static const logout = 'user/logout';
   static const slider = 'slider/all';
