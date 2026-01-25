@@ -7,14 +7,6 @@ import 'features/virtual_window/cubit/window_manager_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    // await dotenv.load(fileName: ".env");
-  } catch (e) {
-    // Silent catch for prototype
-  }
-
-  // Initialize window manager for actual desktop window behavior (optional)
-  // await windowManager.ensureInitialized();
 
   runApp(const PortfolioApp());
 }
