@@ -1,0 +1,19 @@
+{
+  "id": "ecommerce-app",
+  "title": "E-Commerce Mobile App",
+  "description": "A high-performance e-commerce mobile application built with Flutter and Firebase. Features include real-time product updates, Stripe payment integration, and a sleek user interface with advanced animations.",
+  "version": "1.2.0",
+  "techStack": [
+    "Flutter",
+    "Firebase",
+    "Stripe",
+    "Riverpod"
+  ],
+  "tags": [
+    "Mobile",
+    "E-Commerce",
+    "Fintech"
+  ],
+  "repoUrl": "https://github.com/abdisaongithub/ecommerce_app",
+  "gallery": []
+}
