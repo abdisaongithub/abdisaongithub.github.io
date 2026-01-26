@@ -7,6 +7,7 @@ import '../../virtual_window/window_content_builder.dart';
 import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 class MacDesktop extends StatelessWidget {
   const MacDesktop({super.key});
@@ -79,6 +80,8 @@ class _MacMenuBar extends StatelessWidget {
           SizedBox(width: 12),
           Text('Edit', style: TextStyle(color: Colors.white, fontSize: 13)),
           Spacer(),
+          SpotifyWidget(),
+          SizedBox(width: 16),
           Icon(Icons.wifi, color: Colors.white, size: 14),
           SizedBox(width: 12),
           Text('9:41 AM', style: TextStyle(color: Colors.white, fontSize: 13)),

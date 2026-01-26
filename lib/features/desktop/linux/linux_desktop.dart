@@ -7,6 +7,7 @@ import '../../virtual_window/window_content_builder.dart';
 import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 class LinuxDesktop extends StatelessWidget {
   const LinuxDesktop({super.key});
@@ -75,11 +76,7 @@ class _UbuntuTopBar extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   fontSize: 13)),
           Spacer(),
-          Text('Jan 25 01:28 AM',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13)),
+          SpotifyWidget(),
           Spacer(),
           Icon(Icons.wifi, color: Colors.white, size: 14),
           SizedBox(width: 8),

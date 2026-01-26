@@ -9,6 +9,7 @@ import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/github_status_widget.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -208,8 +209,13 @@ class _Win11Taskbar extends StatelessWidget {
             right: 12,
             top: 0,
             bottom: 0,
-            child: Center(
-              child: GithubStatusWidget(username: 'abdisaongithub'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SpotifyWidget(),
+                SizedBox(width: 12),
+                GithubStatusWidget(username: 'abdisaongithub'),
+              ],
             ),
           ),
         ],
