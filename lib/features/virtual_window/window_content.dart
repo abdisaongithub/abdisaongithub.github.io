@@ -11,6 +11,7 @@ enum WindowContentType {
   code,
   settings,
   markdown,
+  gallery,
 }
 
 class WindowContent extends Equatable {
