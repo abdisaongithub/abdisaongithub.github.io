@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../file_system/cubit/file_system_cubit.dart';
+import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../virtual_window/window_content.dart';
 
 class TerminalApp extends StatefulWidget {
   const TerminalApp({super.key});
@@ -80,6 +82,32 @@ class _TerminalAppState extends State<TerminalApp> {
         return 'Created file: ${args[0]}';
       case 'pwd':
         return fsCubit.state.currentPath;
+      case 'open':
+        if (args.isEmpty) return 'usage: open <file_name>';
+        final fileName = args[0];
+        final currentDir = fsCubit.state.currentDirectory;
+        final file = currentDir.children?.firstWhere(
+          (node) => node.name == fileName && !node.isDirectory,
+          orElse: () => throw Exception('File not found'),
+        );
+
+        if (file == null) return 'File not found: $fileName';
+
+        if (fileName.endsWith('.md')) {
+          context.read<WindowManagerCubit>().openWindow(
+                WindowContent(
+                  type: WindowContentType.markdown,
+                  title: fileName,
+                  data: file.content,
+                ),
+              );
+          return 'Opening $fileName...';
+        } else if (fileName.endsWith('.json')) {
+          // Could open in a code viewer later
+          return 'Content of $fileName:\n${file.content}';
+        } else {
+          return 'No app associated with $fileName. Content:\n${file.content}';
+        }
       default:
         return 'Command not found: $cmd. Type "help" for assistance.';
     }

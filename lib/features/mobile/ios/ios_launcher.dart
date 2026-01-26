@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
 
 class IosLauncher extends StatelessWidget {
   const IosLauncher({super.key});
@@ -41,33 +43,49 @@ class IosLauncher extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               crossAxisSpacing: 10,
               mainAxisSpacing: 20,
-              children: const [
+              children: [
                 _IosAppIcon(
                     label: 'FaceTime',
                     icon: Icons.videocam,
-                    color: Colors.green),
+                    color: Colors.green,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.camera)),
                 _IosAppIcon(
                     label: 'Calendar',
                     icon: Icons.calendar_today,
                     color: Colors.white,
-                    iconColor: Colors.red),
+                    iconColor: Colors.red,
+                    onTap: () {}), // No calendar app yet
                 _IosAppIcon(
                     label: 'Photos',
                     icon: Icons.photo_library,
                     color: Colors.white,
-                    iconColor: Colors.orange),
+                    iconColor: Colors.orange,
+                    onTap: () {}), // No photos app yet
                 _IosAppIcon(
                     label: 'Camera',
                     icon: Icons.camera_alt,
-                    color: Colors.grey),
+                    color: Colors.grey,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.camera)),
                 _IosAppIcon(
-                    label: 'Mail', icon: Icons.email, color: Colors.blue),
+                    label: 'Mail',
+                    icon: Icons.email,
+                    color: Colors.blue,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.email)),
                 _IosAppIcon(
-                    label: 'Notes', icon: Icons.note, color: Colors.yellow),
+                    label: 'Projects',
+                    icon: Icons.folder_open,
+                    color: Colors.yellow,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.projects)),
                 _IosAppIcon(
                     label: 'Settings',
                     icon: Icons.settings,
-                    color: Colors.grey),
+                    color: Colors.grey,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.settings)),
               ],
             ),
           ),
@@ -127,29 +145,35 @@ class _IosDock extends StatelessWidget {
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(30),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _IosAppIcon(
                 label: '',
                 icon: Icons.phone,
                 color: Colors.green,
-                isDock: true),
+                isDock: true,
+                onTap: () => AppLauncherService.launch(context, AppType.phone)),
             _IosAppIcon(
                 label: '',
                 icon: Icons.language,
                 color: Colors.blue,
-                isDock: true),
+                isDock: true,
+                onTap: () =>
+                    AppLauncherService.launch(context, AppType.browser)),
             _IosAppIcon(
                 label: '',
                 icon: Icons.chat_bubble,
                 color: Colors.green,
-                isDock: true),
+                isDock: true,
+                onTap: () => AppLauncherService.launch(
+                    context, AppType.email)), // SMS/Chat placeholder
             _IosAppIcon(
                 label: '',
                 icon: Icons.music_note,
                 color: Colors.pink,
-                isDock: true),
+                isDock: true,
+                onTap: () {}),
           ],
         ),
       ),
@@ -163,53 +187,58 @@ class _IosAppIcon extends StatelessWidget {
   final Color color;
   final dynamic iconColor; // Can be Color or "multicolor"
   final bool isDock;
+  final VoidCallback onTap;
 
   const _IosAppIcon({
     required this.label,
     required this.icon,
     required this.color,
+    required this.onTap,
     this.iconColor,
     this.isDock = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: isDock ? 60 : 64,
-          height: isDock ? 60 : 64,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              if (!isDock)
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2)),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: isDock ? 60 : 64,
+            height: isDock ? 60 : 64,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                if (!isDock)
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2)),
+              ],
+            ),
+            child: Icon(
+              icon,
+              color: iconColor is Color
+                  ? iconColor
+                  : (color == Colors.white ? Colors.blue : Colors.white),
+              size: isDock ? 32 : 36,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: iconColor is Color
-                ? iconColor
-                : (color == Colors.white ? Colors.blue : Colors.white),
-            size: isDock ? 32 : 36,
-          ),
-        ),
-        if (!isDock) ...[
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.normal),
-          ),
+          if (!isDock) ...[
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.normal),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

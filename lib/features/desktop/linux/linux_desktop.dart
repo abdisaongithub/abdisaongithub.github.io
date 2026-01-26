@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
 
 class LinuxDesktop extends StatelessWidget {
   const LinuxDesktop({super.key});
@@ -94,13 +98,32 @@ class _UbuntuDock extends StatelessWidget {
       color: Colors.black.withOpacity(0.3),
       child: Column(
         children: [
-          _DockAppIcon(icon: Icons.grid_view, color: Colors.white),
+          _DockAppIcon(
+              icon: Icons.grid_view,
+              color: Colors.white,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.projects)),
           const SizedBox(height: 12),
-          _DockAppIcon(icon: Icons.folder, color: Colors.orange),
-          _DockAppIcon(icon: Icons.language, color: Colors.orange),
-          _DockAppIcon(icon: Icons.settings, color: Colors.grey),
+          _DockAppIcon(
+              icon: Icons.folder,
+              color: Colors.orange,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.projects)),
+          _DockAppIcon(
+              icon: Icons.language,
+              color: Colors.orange,
+              onTap: () => AppLauncherService.launch(context, AppType.browser)),
+          _DockAppIcon(
+              icon: Icons.settings,
+              color: Colors.grey,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.settings)),
           const Spacer(),
-          _DockAppIcon(icon: Icons.apps, color: Colors.white),
+          _DockAppIcon(
+              icon: Icons.apps,
+              color: Colors.white,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.terminal)),
           const SizedBox(height: 8),
         ],
       ),
@@ -111,13 +134,22 @@ class _UbuntuDock extends StatelessWidget {
 class _DockAppIcon extends StatelessWidget {
   final IconData icon;
   final Color color;
-  const _DockAppIcon({required this.icon, required this.color});
+  final VoidCallback onTap;
+
+  const _DockAppIcon({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Icon(icon, color: color, size: 28),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Icon(icon, color: color, size: 28),
+      ),
     );
   }
 }
@@ -163,11 +195,11 @@ class _LinuxWindowManager extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    color: const Color(0xFFF2F1F0),
-                    child: Center(
-                        child: Text("Linux Content: ${window.content.title}",
-                            style: const TextStyle(color: Colors.black))),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8)),
+                    child: WindowContentBuilder(content: window.content),
                   ),
                 );
               })

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:mobile_number/mobile_number.dart'; // Maybe useful for sim details, but simplified for now
 import '../../os_mode/cubit/os_mode_cubit.dart';
 import '../../os_mode/os_mode.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
 
 class AndroidLauncher extends StatelessWidget {
   const AndroidLauncher({super.key});
@@ -47,34 +49,35 @@ class AndroidLauncher extends StatelessWidget {
                   label: 'About',
                   icon: Icons.person,
                   color: Colors.blue,
-                  onTap: () {},
+                  onTap: () => AppLauncherService.launch(context, AppType.cv),
                 ),
                 _AppIcon(
                   label: 'Projects',
                   icon: Icons.folder,
                   color: Colors.amber,
-                  onTap: () {},
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.projects),
                 ),
                 _AppIcon(
                   label: 'Skills',
                   icon: Icons.bolt,
                   color: Colors.yellow,
+                  // TODO: Add Skills app type or modal
                   onTap: () {},
                 ),
                 _AppIcon(
                   label: 'Contact',
                   icon: Icons.email,
                   color: Colors.red,
-                  onTap: () {},
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.email),
                 ),
                 _AppIcon(
                   label: 'Settings',
                   icon: Icons.settings,
                   color: Colors.grey,
-                  onTap: () {
-                    // Example of "OS" switch via settings app
-                    context.read<OSModeCubit>().setMode(OSMode.windows);
-                  },
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.settings),
                 ),
               ],
             ),

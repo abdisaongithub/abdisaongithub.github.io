@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../theme/theme_cubit.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
 import '../../virtual_window/window_content_builder.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -22,14 +25,17 @@ class WindowsDesktop extends StatelessWidget {
           children: [
             // Wallpaper
             Positioned.fill(
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/windows_wallpaper.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                // child: Image.asset('assets/images/win11_wallpaper.jpg', fit: BoxFit.cover),
+              child: BlocBuilder<ThemeCubit, ThemeState>(
+                builder: (context, state) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(state.wallpaper),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -45,12 +51,7 @@ class WindowsDesktop extends StatelessWidget {
                     label: 'About Me',
                     icon: Icons.person_outline, // Closest to Fluent "Contact"
                     onTap: () {
-                      context.read<WindowManagerCubit>().openWindow(
-                            const WindowContent(
-                              type: WindowContentType.profile,
-                              title: 'About Me',
-                            ),
-                          );
+                      AppLauncherService.launch(context, AppType.cv);
                     },
                   ),
                   const SizedBox(height: 20),
@@ -58,13 +59,23 @@ class WindowsDesktop extends StatelessWidget {
                     label: 'Projects',
                     icon: Icons.folder_open_outlined,
                     onTap: () {
-                      context.read<WindowManagerCubit>().openWindow(
-                            const WindowContent(
-                              type: WindowContentType.projectDetail,
-                              title: 'Projects',
-                              data: 'All',
-                            ),
-                          );
+                      AppLauncherService.launch(context, AppType.projects);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _Win11Icon(
+                    label: 'Terminal',
+                    icon: Icons.terminal,
+                    onTap: () {
+                      AppLauncherService.launch(context, AppType.terminal);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _Win11Icon(
+                    label: 'VS Code',
+                    icon: Icons.code, // Placeholder for VS Code icon
+                    onTap: () {
+                      AppLauncherService.launch(context, AppType.code);
                     },
                   ),
                 ],
@@ -289,10 +300,7 @@ class _WindowsWindowManager extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    color: const Color(0xFFF9F9F9), // Windows 11 light bg
-                    child: WindowContentBuilder.build(window.content),
-                  ),
+                  child: WindowContentBuilder(content: window.content),
                 );
               })
               .toList()
@@ -302,7 +310,6 @@ class _WindowsWindowManager extends StatelessWidget {
     );
   }
 }
-
 
 class _WindowCaptionButton extends StatefulWidget {
   final IconData icon;
