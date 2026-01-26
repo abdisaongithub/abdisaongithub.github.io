@@ -1,12 +1,18 @@
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
 import '../models/file_node.dart';
+import '../services/project_loader_service.dart';
 
 part 'file_system_state.dart';
 
 class FileSystemCubit extends Cubit<FileSystemState> {
-  FileSystemCubit() : super(FileSystemState(root: FileNode.root())) {
+  final ProjectLoaderService _projectLoader;
+
+  FileSystemCubit({ProjectLoaderService? projectLoader}) 
+      : _projectLoader = projectLoader ?? ProjectLoaderService(),
+        super(FileSystemState(root: FileNode.root())) {
     _initializeDefaultStructure();
   }
 
@@ -54,7 +60,55 @@ class FileSystemCubit extends Cubit<FileSystemState> {
     );
 
     emit(state.copyWith(root: newRoot, currentPath: '/home/abdisa'));
+    
+    // Trigger async loading of projects
+    _loadProjects();
   }
+
+  Future<void> _loadProjects() async {
+    try {
+      final loadedProjects = await _projectLoader.loadAllProjects();
+      
+      for (final project in loadedProjects) {
+        // Create a directory for each project
+        final projectDirId = _uuid.v4();
+        final projectDir = FileNode(
+          id: projectDirId,
+          name: project.id, // e.g., 'portfolio'
+          type: FileType.directory,
+          parentId: _findNodeIdByPath('/home/abdisa/projects'),
+          children: [
+            // manifest.json
+            FileNode(
+              id: _uuid.v4(),
+              name: 'manifest.json',
+              type: FileType.file,
+              content: json.encode(project.toJson()),
+              parentId: projectDirId,
+            ),
+            // README.md (generated from description)
+            FileNode(
+              id: _uuid.v4(),
+              name: 'README.md',
+              type: FileType.file,
+              content: '# ${project.title}\n\n${project.description}\n\nStack: ${project.techStack.join(", ")}',
+              parentId: projectDirId,
+            ),
+          ],
+        );
+
+        _addNodeToPath('/home/abdisa/projects', projectDir);
+      }
+    } catch (e) {
+      print('Failed to load projects into VFS: $e');
+    }
+  }
+
+  // Helper to find ID from path (naive implementation for now)
+  String? _findNodeIdByPath(String path) {
+    return state.getNode(path)?.id;
+  }
+
 
   // Change Directory
   void cd(String path) {
