@@ -7,6 +7,7 @@ import '../../virtual_window/virtual_window_widget.dart';
 import '../../virtual_window/window_content_builder.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/github_status_widget.dart';
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -173,32 +174,44 @@ class _Win11Taskbar extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
         ],
       ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _TaskbarIcon(
-                  icon: Icons.window,
-                  color: const Color(0xFF00ADEF),
-                  onTap: () {}), // Start
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.search, color: Colors.white, onTap: () {}),
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.web_asset,
-                  color: Colors.white,
-                  onTap: () {}), // Task view
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.chat_bubble_outline,
-                  color: Colors.white,
-                  onTap: () {}), // Chat
-            ],
+      child: Stack(
+        children: [
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _TaskbarIcon(
+                      icon: Icons.window,
+                      color: const Color(0xFF00ADEF),
+                      onTap: () {}), // Start
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.search, color: Colors.white, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.web_asset,
+                      color: Colors.white,
+                      onTap: () {}), // Task view
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.chat_bubble_outline,
+                      color: Colors.white,
+                      onTap: () {}), // Chat
+                ],
+              ),
+            ),
           ),
-        ),
+          const Positioned(
+            right: 12,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: GithubStatusWidget(username: 'abdisaongithub'),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../apps/widgets/markdown_viewer_app.dart';
 import '../apps/widgets/terminal_app.dart';
+import '../apps/widgets/gallery_app.dart';
+import '../apps/widgets/project_explorer.dart';
 import 'window_content.dart';
 
 class WindowContentBuilder extends StatelessWidget {
@@ -18,10 +20,14 @@ class WindowContentBuilder extends StatelessWidget {
         );
       case WindowContentType.terminal:
         return const TerminalApp();
-      case WindowContentType.profile:
-        return const Center(child: Text("Profile App Placeholder"));
+      case WindowContentType.gallery:
+        return GalleryApp(
+          images: content.data as List<String>? ?? [],
+          title: content.title,
+        );
       case WindowContentType.projectDetail:
-        return const Center(child: Text("Project Detail Placeholder"));
+        return const ProjectExplorer();
+      case WindowContentType.profile:
       case WindowContentType.code:
         return const Center(child: Text("Code Editor Placeholder"));
       case WindowContentType.settings:
