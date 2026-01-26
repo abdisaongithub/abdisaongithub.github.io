@@ -98,12 +98,23 @@ class _FileIcon extends StatelessWidget {
       context.read<FileSystemCubit>().cd(node.name);
     } else {
       // Open file
-      if (node.name.endsWith('.md')) {
+      final fileName = node.name.toLowerCase();
+      if (fileName.endsWith('.md')) {
         context.read<WindowManagerCubit>().openWindow(
               WindowContent(
                 type: WindowContentType.markdown,
                 title: node.name,
                 data: node.content,
+              ),
+            );
+      } else if (fileName.endsWith('.png') ||
+          fileName.endsWith('.jpg') ||
+          fileName.endsWith('.jpeg')) {
+        context.read<WindowManagerCubit>().openWindow(
+              WindowContent(
+                type: WindowContentType.gallery,
+                title: node.name,
+                data: [node.content], // Assuming content is path or base64 for now
               ),
             );
       } else {
@@ -116,8 +127,12 @@ class _FileIcon extends StatelessWidget {
   }
 
   IconData _getIconForFile(String name) {
-    if (name.endsWith('.md')) return Icons.description;
-    if (name.endsWith('.json')) return Icons.code;
+    final fileName = name.toLowerCase();
+    if (fileName.endsWith('.md')) return Icons.description;
+    if (fileName.endsWith('.json')) return Icons.code;
+    if (fileName.endsWith('.png') ||
+        fileName.endsWith('.jpg') ||
+        fileName.endsWith('.jpeg')) return Icons.image;
     return Icons.insert_drive_file;
   }
 }
