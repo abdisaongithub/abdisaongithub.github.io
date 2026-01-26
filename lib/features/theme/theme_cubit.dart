@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // STATE
 class ThemeState extends Equatable {
@@ -34,13 +35,36 @@ class ThemeState extends Equatable {
 
 // CUBIT
 class ThemeCubit extends Cubit<ThemeState> {
-  ThemeCubit() : super(ThemeState.initial());
+  static const _wallpaperKey = 'selected_wallpaper';
+  static const _darkModeKey = 'is_dark_mode';
 
-  void setWallpaper(String assetPath) {
-    emit(state.copyWith(wallpaper: assetPath));
+  ThemeCubit() : super(ThemeState.initial()) {
+    _loadPreferences();
   }
 
-  void toggleTheme() {
-    emit(state.copyWith(isDarkMode: !state.isDarkMode));
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final wallpaper = prefs.getString(_wallpaperKey);
+    final isDarkMode = prefs.getBool(_darkModeKey);
+
+    if (wallpaper != null || isDarkMode != null) {
+      emit(state.copyWith(
+        wallpaper: wallpaper ?? state.wallpaper,
+        isDarkMode: isDarkMode ?? state.isDarkMode,
+      ));
+    }
+  }
+
+  Future<void> setWallpaper(String assetPath) async {
+    emit(state.copyWith(wallpaper: assetPath));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_wallpaperKey, assetPath);
+  }
+
+  Future<void> toggleTheme() async {
+    final newMode = !state.isDarkMode;
+    emit(state.copyWith(isDarkMode: newMode));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_darkModeKey, newMode);
   }
 }

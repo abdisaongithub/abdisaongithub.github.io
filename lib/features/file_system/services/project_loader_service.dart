@@ -28,6 +28,8 @@ class ProjectLoaderService {
     // For now, we manually list known projects.
     const projectPaths = [
       'assets/projects/portfolio/manifest.json',
+      'assets/projects/ecommerce-app/manifest.json',
+      'assets/projects/task-manager/manifest.json',
     ];
 
     final List<ProjectManifest> projects = [];
