@@ -5,6 +5,7 @@ import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
 import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/github_status_widget.dart';
@@ -272,45 +273,12 @@ class _WindowsWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    // High-Fidelity Windows 11 Title Bar
-                    return Container(
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          topRight: Radius.circular(8),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          _WindowCaptionButton(
-                            icon: Icons.remove,
-                            onPressed: minimize,
-                          ),
-                          _WindowCaptionButton(
-                            icon: Icons.check_box_outline_blank, // Square
-                            onPressed: maximize,
-                          ),
-                          _WindowCaptionButton(
-                            icon: Icons.close,
-                            onPressed: close,
-                            isCloseBtn: true,
-                          ),
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.windows,
                     );
                   },
                   child: WindowContentBuilder(content: window.content),
@@ -320,50 +288,6 @@ class _WindowsWindowManager extends StatelessWidget {
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _WindowCaptionButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool isCloseBtn;
-
-  const _WindowCaptionButton({
-    required this.icon,
-    required this.onPressed,
-    this.isCloseBtn = false,
-  });
-
-  @override
-  State<_WindowCaptionButton> createState() => _WindowCaptionButtonState();
-}
-
-class _WindowCaptionButtonState extends State<_WindowCaptionButton> {
-  bool _hovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: Container(
-          width: 46,
-          height: 32,
-          color: _hovering
-              ? (widget.isCloseBtn
-                  ? const Color(0xFFC42B1C)
-                  : const Color(0xFFE5E5E5))
-              : Colors.transparent,
-          child: Icon(
-            widget.icon,
-            size: 14,
-            color: _hovering && widget.isCloseBtn ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
     );
   }
 }

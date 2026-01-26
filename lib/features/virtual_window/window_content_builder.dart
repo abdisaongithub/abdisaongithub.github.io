@@ -3,6 +3,9 @@ import '../apps/widgets/markdown_viewer_app.dart';
 import '../apps/widgets/terminal_app.dart';
 import '../apps/widgets/gallery_app.dart';
 import '../apps/widgets/project_explorer.dart';
+import '../apps/widgets/code_editor_app.dart';
+import '../apps/widgets/settings_app.dart';
+import '../apps/widgets/experience_app.dart';
 import 'window_content.dart';
 
 class WindowContentBuilder extends StatelessWidget {
@@ -27,11 +30,14 @@ class WindowContentBuilder extends StatelessWidget {
         );
       case WindowContentType.projectDetail:
         return const ProjectExplorer();
-      case WindowContentType.profile:
       case WindowContentType.code:
-        return const Center(child: Text("Code Editor Placeholder"));
+        return const CodeEditorApp();
       case WindowContentType.settings:
-        return const Center(child: Text("Settings App Placeholder"));
+        return const SettingsApp();
+      case WindowContentType.experience:
+        return const ExperienceApp();
+      case WindowContentType.profile:
+        return const Center(child: Text("Profile App Placeholder"));
       default:
         return Center(child: Text("Unknown Content: ${content.type}"));
     }

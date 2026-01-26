@@ -4,6 +4,7 @@ import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
 import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 
@@ -168,31 +169,12 @@ class _LinuxWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    return Container(
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF3E3E3E), // Ubuntu window header
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Spacer(),
-                          Text(title,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold)),
-                          const Spacer(),
-                          _UbuntuWindowBtn(icon: Icons.remove, onTap: minimize),
-                          _UbuntuWindowBtn(
-                              icon: Icons.crop_square, onTap: maximize),
-                          _UbuntuWindowBtn(
-                              icon: Icons.close, onTap: close, isClose: true),
-                          const SizedBox(width: 4),
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.linux,
                     );
                   },
                   child: ClipRRect(
@@ -207,32 +189,6 @@ class _LinuxWindowManager extends StatelessWidget {
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _UbuntuWindowBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isClose;
-  const _UbuntuWindowBtn(
-      {required this.icon, required this.onTap, this.isClose = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          color:
-              isClose ? const Color(0xFFE95420) : Colors.white.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 14, color: Colors.white),
-      ),
     );
   }
 }

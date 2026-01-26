@@ -4,6 +4,7 @@ import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
 import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 
@@ -178,60 +179,21 @@ class _MacWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    return Container(
-                      height: 28,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEBEBEB),
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.red, onTap: close),
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.orange, onTap: minimize),
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.green, onTap: maximize),
-                          const Spacer(),
-                          Text(title,
-                              style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w500)),
-                          const Spacer(),
-                          const SizedBox(width: 60), // Balance the stoplights
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.mac,
                     );
                   },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(0),
-                    child: WindowContentBuilder(content: window.content),
-                  ),
+                  child: WindowContentBuilder(content: window.content),
                 );
               })
               .toList()
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _MacStoplight extends StatelessWidget {
-  final Color color;
-  final VoidCallback onTap;
-  const _MacStoplight({required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      ),
     );
   }
 }

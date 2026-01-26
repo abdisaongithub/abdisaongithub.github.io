@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
@@ -71,5 +72,15 @@ class WindowManagerCubit extends Cubit<WindowManagerState> {
     emit(state.copyWith(windows: updatedWindows));
   }
 
-  // Add resize/move logic if needed, or handle locally in widget and update here for persistence
+  void moveWindow(String id, Offset delta) {
+    final updatedWindows = state.windows.map((w) {
+      if (w.id == id) {
+        return w.copyWith(
+          position: w.position + delta,
+        );
+      }
+      return w;
+    }).toList();
+    emit(state.copyWith(windows: updatedWindows));
+  }
 }
