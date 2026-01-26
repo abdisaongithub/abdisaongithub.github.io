@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -290,12 +291,7 @@ class _WindowsWindowManager extends StatelessWidget {
                   },
                   child: Container(
                     color: const Color(0xFFF9F9F9), // Windows 11 light bg
-                    child: Center(
-                      child: Text(
-                        "Content: ${window.content.type}",
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                    ),
+                    child: WindowContentBuilder.build(window.content),
                   ),
                 );
               })
@@ -306,6 +302,7 @@ class _WindowsWindowManager extends StatelessWidget {
     );
   }
 }
+
 
 class _WindowCaptionButton extends StatefulWidget {
   final IconData icon;

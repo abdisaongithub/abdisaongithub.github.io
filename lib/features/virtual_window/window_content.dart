@@ -7,6 +7,7 @@ enum WindowContentType {
   experience,
   contact,
   webBrowser, // For external links if we want to fake a browser
+  markdown,
 }
 
 class WindowContent extends Equatable {
