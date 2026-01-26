@@ -6,7 +6,10 @@ enum WindowContentType {
   skills,
   experience,
   contact,
-  webBrowser, // For external links if we want to fake a browser
+  webBrowser,
+  terminal,
+  code,
+  settings,
   markdown,
 }
 

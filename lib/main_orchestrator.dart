@@ -20,43 +20,8 @@ class MainOrchestrator extends StatefulWidget {
 }
 
 class _MainOrchestratorState extends State<MainOrchestrator> {
-  bool? _lastIsPortrait;
-
-  void _handleAdaptiveSwitch(BuildContext context, BoxConstraints constraints,
-      OSModeState currentState) {
-    final isPortrait = constraints.maxHeight > constraints.maxWidth;
-
-    // Detect orientation change and reset manual flag if it changed
-    if (_lastIsPortrait != null && _lastIsPortrait != isPortrait) {
-      if (currentState.isManual) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context
-              .read<OSModeCubit>()
-              .setMode(currentState.mode, isManual: false);
-        });
-      }
-    }
-    _lastIsPortrait = isPortrait;
-
-    if (currentState.isManual)
-      return; // Don't override OS if user manually set it
-
-    if (isPortrait) {
-      if (currentState.mode != OSMode.android &&
-          currentState.mode != OSMode.ios) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<OSModeCubit>().setMode(OSMode.ios, isManual: false);
-        });
-      }
-    } else {
-      if (currentState.mode == OSMode.android ||
-          currentState.mode == OSMode.ios) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<OSModeCubit>().setMode(OSMode.macos, isManual: false);
-        });
-      }
-    }
-  }
+  // Disabling the automatic observer to prevent "glitches"
+  // as requested by the user.
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +29,6 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
       builder: (context, state) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            _handleAdaptiveSwitch(context, constraints, state);
-
             final isPortrait = constraints.maxHeight > constraints.maxWidth;
             final isMobileMode =
                 state.mode == OSMode.android || state.mode == OSMode.ios;
@@ -86,7 +49,7 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
                     _buildBGLayer(state.mode),
 
                   // 2. Full Screen Toggle (Top Right)
-                  if (!isPortrait) // Hide in portrait to maximize space
+                  if (!isPortrait)
                     Positioned(
                       top: 40,
                       right: 20,
@@ -106,7 +69,7 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
 
   Widget _buildMobileSimulator(BuildContext context, OSMode mode) {
     return Container(
-      color: const Color(0xFF0F0F0F), // Sleek deep background
+      color: const Color(0xFF0F0F0F),
       child: Center(
         child: Container(
           width: 360,
@@ -114,7 +77,7 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(48), // Smoother premium corners
+            borderRadius: BorderRadius.circular(48),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.8),
@@ -125,13 +88,11 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
           ),
           foregroundDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(48),
-            border:
-                Border.all(color: const Color(0xFF1F1F1F), width: 12), // Bezel
+            border: Border.all(color: const Color(0xFF1F1F1F), width: 12),
           ),
           child: Stack(
             children: [
               _buildBGLayer(mode),
-              // The Notch
               Align(
                 alignment: Alignment.topCenter,
                 child: Container(

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
 
 class MacDesktop extends StatelessWidget {
   const MacDesktop({super.key});
@@ -97,14 +101,34 @@ class _MacDock extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)
         ],
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _DockItem(icon: Icons.face, color: Colors.blue),
-          _DockItem(icon: Icons.mail, color: Colors.white),
-          _DockItem(icon: Icons.camera_alt, color: Colors.grey),
-          _DockItem(icon: Icons.music_note, color: Colors.pinkAccent),
-          _DockItem(icon: Icons.settings, color: Colors.grey),
+          _DockItem(
+            icon: Icons.face,
+            color: Colors.blue,
+            onTap: () => AppLauncherService.launch(context, AppType.cv),
+          ),
+          _DockItem(
+            icon: Icons.mail,
+            color: Colors.white,
+            onTap: () => AppLauncherService.launch(context, AppType.email),
+          ),
+          _DockItem(
+            icon: Icons.camera_alt,
+            color: Colors.grey,
+            onTap: () => AppLauncherService.launch(context, AppType.camera),
+          ),
+          _DockItem(
+            icon: Icons.music_note,
+            color: Colors.pinkAccent,
+            onTap: () => AppLauncherService.launch(context, AppType.projects),
+          ),
+          _DockItem(
+            icon: Icons.settings,
+            color: Colors.grey,
+            onTap: () => AppLauncherService.launch(context, AppType.settings),
+          ),
         ],
       ),
     );
@@ -114,7 +138,13 @@ class _MacDock extends StatelessWidget {
 class _DockItem extends StatelessWidget {
   final IconData icon;
   final Color color;
-  const _DockItem({required this.icon, required this.color});
+  final VoidCallback onTap;
+
+  const _DockItem({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +156,10 @@ class _DockItem extends StatelessWidget {
         color: color.withOpacity(0.8),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: Colors.white, size: 28),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Icon(icon, color: Colors.white, size: 28),
+      ),
     );
   }
 }
@@ -171,10 +204,9 @@ class _MacWindowManager extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    color: Colors.white,
-                    child: Center(
-                        child: Text("App Content: ${window.content.title}")),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0),
+                    child: WindowContentBuilder(content: window.content),
                   ),
                 );
               })
