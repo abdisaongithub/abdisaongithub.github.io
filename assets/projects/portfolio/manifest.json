@@ -1,0 +1,20 @@
+{
+  "id": "portfolio",
+  "title": "Flutter Portfolio OS",
+  "description": "A web-based portfolio imitating various operating systems (Windows, macOS, Linux, Android, iOS).",
+  "version": "1.0.0",
+  "techStack": [
+    "Flutter",
+    "Dart",
+    "Bloc",
+    "Firebase"
+  ],
+  "tags": [
+    "Web",
+    "UI/UX",
+    "Open Source"
+  ],
+  "repoUrl": "https://github.com/abdisaongithub/flutter_portfolio_app",
+  "liveUrl": "https://abdisaongithub.github.io/",
+  "gallery": []
+}
