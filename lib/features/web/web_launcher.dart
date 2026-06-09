@@ -68,7 +68,7 @@ class _MeshBackground extends StatelessWidget {
           Positioned.fill(
             child: BackdropFilter(
               filter: ui.ImageFilter.blur(
-                  sigmaX: 60, sigmaY: 60), // Reduced slightly for web stability
+                  sigmaX: 30, sigmaY: 30),
               child: Container(color: Colors.transparent),
             ),
           ),
