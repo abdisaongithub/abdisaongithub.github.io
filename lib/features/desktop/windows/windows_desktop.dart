@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../theme/theme_cubit.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/github_status_widget.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -21,14 +28,17 @@ class WindowsDesktop extends StatelessWidget {
           children: [
             // Wallpaper
             Positioned.fill(
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/windows_wallpaper.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                // child: Image.asset('assets/images/win11_wallpaper.jpg', fit: BoxFit.cover),
+              child: BlocBuilder<ThemeCubit, ThemeState>(
+                builder: (context, state) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(state.wallpaper),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -44,12 +54,7 @@ class WindowsDesktop extends StatelessWidget {
                     label: 'About Me',
                     icon: Icons.person_outline, // Closest to Fluent "Contact"
                     onTap: () {
-                      context.read<WindowManagerCubit>().openWindow(
-                            const WindowContent(
-                              type: WindowContentType.profile,
-                              title: 'About Me',
-                            ),
-                          );
+                      AppLauncherService.launch(context, AppType.cv);
                     },
                   ),
                   const SizedBox(height: 20),
@@ -57,13 +62,23 @@ class WindowsDesktop extends StatelessWidget {
                     label: 'Projects',
                     icon: Icons.folder_open_outlined,
                     onTap: () {
-                      context.read<WindowManagerCubit>().openWindow(
-                            const WindowContent(
-                              type: WindowContentType.projectDetail,
-                              title: 'Projects',
-                              data: 'All',
-                            ),
-                          );
+                      AppLauncherService.launch(context, AppType.projects);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _Win11Icon(
+                    label: 'Terminal',
+                    icon: Icons.terminal,
+                    onTap: () {
+                      AppLauncherService.launch(context, AppType.terminal);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _Win11Icon(
+                    label: 'VS Code',
+                    icon: Icons.code, // Placeholder for VS Code icon
+                    onTap: () {
+                      AppLauncherService.launch(context, AppType.code);
                     },
                   ),
                 ],
@@ -161,32 +176,49 @@ class _Win11Taskbar extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
         ],
       ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _TaskbarIcon(
-                  icon: Icons.window,
-                  color: const Color(0xFF00ADEF),
-                  onTap: () {}), // Start
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.search, color: Colors.white, onTap: () {}),
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.web_asset,
-                  color: Colors.white,
-                  onTap: () {}), // Task view
-              const SizedBox(width: 8),
-              _TaskbarIcon(
-                  icon: Icons.chat_bubble_outline,
-                  color: Colors.white,
-                  onTap: () {}), // Chat
-            ],
+      child: Stack(
+        children: [
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _TaskbarIcon(
+                      icon: Icons.window,
+                      color: const Color(0xFF00ADEF),
+                      onTap: () {}), // Start
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.search, color: Colors.white, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.web_asset,
+                      color: Colors.white,
+                      onTap: () {}), // Task view
+                  const SizedBox(width: 8),
+                  _TaskbarIcon(
+                      icon: Icons.chat_bubble_outline,
+                      color: Colors.white,
+                      onTap: () {}), // Chat
+                ],
+              ),
+            ),
           ),
-        ),
+          const Positioned(
+            right: 12,
+            top: 0,
+            bottom: 0,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SpotifyWidget(),
+                SizedBox(width: 12),
+                GithubStatusWidget(username: 'abdisaongithub'),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -247,106 +279,21 @@ class _WindowsWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    // High-Fidelity Windows 11 Title Bar
-                    return Container(
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          topRight: Radius.circular(8),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          _WindowCaptionButton(
-                            icon: Icons.remove,
-                            onPressed: minimize,
-                          ),
-                          _WindowCaptionButton(
-                            icon: Icons.check_box_outline_blank, // Square
-                            onPressed: maximize,
-                          ),
-                          _WindowCaptionButton(
-                            icon: Icons.close,
-                            onPressed: close,
-                            isCloseBtn: true,
-                          ),
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.windows,
                     );
                   },
-                  child: Container(
-                    color: const Color(0xFFF9F9F9), // Windows 11 light bg
-                    child: Center(
-                      child: Text(
-                        "Content: ${window.content.type}",
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                    ),
-                  ),
+                  child: WindowContentBuilder(content: window.content),
                 );
               })
               .toList()
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _WindowCaptionButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool isCloseBtn;
-
-  const _WindowCaptionButton({
-    required this.icon,
-    required this.onPressed,
-    this.isCloseBtn = false,
-  });
-
-  @override
-  State<_WindowCaptionButton> createState() => _WindowCaptionButtonState();
-}
-
-class _WindowCaptionButtonState extends State<_WindowCaptionButton> {
-  bool _hovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: Container(
-          width: 46,
-          height: 32,
-          color: _hovering
-              ? (widget.isCloseBtn
-                  ? const Color(0xFFC42B1C)
-                  : const Color(0xFFE5E5E5))
-              : Colors.transparent,
-          child: Icon(
-            widget.icon,
-            size: 14,
-            color: _hovering && widget.isCloseBtn ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
     );
   }
 }

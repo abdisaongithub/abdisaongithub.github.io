@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 class LinuxDesktop extends StatelessWidget {
   const LinuxDesktop({super.key});
@@ -70,11 +76,7 @@ class _UbuntuTopBar extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   fontSize: 13)),
           Spacer(),
-          Text('Jan 25 01:28 AM',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13)),
+          SpotifyWidget(),
           Spacer(),
           Icon(Icons.wifi, color: Colors.white, size: 14),
           SizedBox(width: 8),
@@ -94,13 +96,32 @@ class _UbuntuDock extends StatelessWidget {
       color: Colors.black.withOpacity(0.3),
       child: Column(
         children: [
-          _DockAppIcon(icon: Icons.grid_view, color: Colors.white),
+          _DockAppIcon(
+              icon: Icons.grid_view,
+              color: Colors.white,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.projects)),
           const SizedBox(height: 12),
-          _DockAppIcon(icon: Icons.folder, color: Colors.orange),
-          _DockAppIcon(icon: Icons.language, color: Colors.orange),
-          _DockAppIcon(icon: Icons.settings, color: Colors.grey),
+          _DockAppIcon(
+              icon: Icons.folder,
+              color: Colors.orange,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.projects)),
+          _DockAppIcon(
+              icon: Icons.language,
+              color: Colors.orange,
+              onTap: () => AppLauncherService.launch(context, AppType.browser)),
+          _DockAppIcon(
+              icon: Icons.settings,
+              color: Colors.grey,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.settings)),
           const Spacer(),
-          _DockAppIcon(icon: Icons.apps, color: Colors.white),
+          _DockAppIcon(
+              icon: Icons.apps,
+              color: Colors.white,
+              onTap: () =>
+                  AppLauncherService.launch(context, AppType.terminal)),
           const SizedBox(height: 8),
         ],
       ),
@@ -111,13 +132,22 @@ class _UbuntuDock extends StatelessWidget {
 class _DockAppIcon extends StatelessWidget {
   final IconData icon;
   final Color color;
-  const _DockAppIcon({required this.icon, required this.color});
+  final VoidCallback onTap;
+
+  const _DockAppIcon({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Icon(icon, color: color, size: 28),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Icon(icon, color: color, size: 28),
+      ),
     );
   }
 }
@@ -136,38 +166,19 @@ class _LinuxWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    return Container(
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF3E3E3E), // Ubuntu window header
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Spacer(),
-                          Text(title,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold)),
-                          const Spacer(),
-                          _UbuntuWindowBtn(icon: Icons.remove, onTap: minimize),
-                          _UbuntuWindowBtn(
-                              icon: Icons.crop_square, onTap: maximize),
-                          _UbuntuWindowBtn(
-                              icon: Icons.close, onTap: close, isClose: true),
-                          const SizedBox(width: 4),
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.linux,
                     );
                   },
-                  child: Container(
-                    color: const Color(0xFFF2F1F0),
-                    child: Center(
-                        child: Text("Linux Content: ${window.content.title}",
-                            style: const TextStyle(color: Colors.black))),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8)),
+                    child: WindowContentBuilder(content: window.content),
                   ),
                 );
               })
@@ -175,32 +186,6 @@ class _LinuxWindowManager extends StatelessWidget {
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _UbuntuWindowBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isClose;
-  const _UbuntuWindowBtn(
-      {required this.icon, required this.onTap, this.isClose = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          color:
-              isClose ? const Color(0xFFE95420) : Colors.white.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 14, color: Colors.white),
-      ),
     );
   }
 }

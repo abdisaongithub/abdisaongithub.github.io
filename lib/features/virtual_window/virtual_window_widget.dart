@@ -42,13 +42,13 @@ class VirtualWindow extends StatelessWidget {
             children: [
               // Title Bar / Header (Draggable)
               GestureDetector(
+                onPanStart: (_) {
+                  context.read<WindowManagerCubit>().focusWindow(window.id);
+                },
                 onPanUpdate: (details) {
-                  // TODO: Implement drag logic via Cubit or local state if Cubit is too slow
-                  // For now, let's assume we update Cubit or use a local ValueNotifier for smooth drag
-                  // Simple implementation: Update Cubit directly (might be laggy without optimization, but safest for state)
-                  /* 
-                  context.read<WindowManagerCubit>().moveWindow(window.id, details.delta); 
-                  */
+                  context
+                      .read<WindowManagerCubit>()
+                      .moveWindow(window.id, details.delta);
                 },
                 child: headerBuilder(
                   context,

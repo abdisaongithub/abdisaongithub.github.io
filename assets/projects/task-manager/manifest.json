@@ -1,0 +1,19 @@
+{
+  "id": "task-manager",
+  "title": "Task Manager API",
+  "description": "A robust RESTful API for task management, supporting multi-tenancy, user roles, and advanced filtering. Built with Node.js and MongoDB, it features JWT authentication and comprehensive documentation via Swagger.",
+  "version": "2.0.1",
+  "techStack": [
+    "Node.js",
+    "Express",
+    "MongoDB",
+    "Docker"
+  ],
+  "tags": [
+    "Backend",
+    "API",
+    "Architecture"
+  ],
+  "repoUrl": "https://github.com/abdisaongithub/task_manager_api",
+  "gallery": []
+}

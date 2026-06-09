@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../virtual_window/window_content.dart';
 import '../../virtual_window/virtual_window_widget.dart';
+import '../../virtual_window/window_content_builder.dart';
+import '../../virtual_window/base_window_frame.dart';
+import '../../apps/app_enums.dart';
+import '../../apps/app_launcher_service.dart';
+import '../../apps/widgets/spotify_widget.dart';
 
 class MacDesktop extends StatelessWidget {
   const MacDesktop({super.key});
@@ -74,6 +80,8 @@ class _MacMenuBar extends StatelessWidget {
           SizedBox(width: 12),
           Text('Edit', style: TextStyle(color: Colors.white, fontSize: 13)),
           Spacer(),
+          SpotifyWidget(),
+          SizedBox(width: 16),
           Icon(Icons.wifi, color: Colors.white, size: 14),
           SizedBox(width: 12),
           Text('9:41 AM', style: TextStyle(color: Colors.white, fontSize: 13)),
@@ -97,14 +105,34 @@ class _MacDock extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)
         ],
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _DockItem(icon: Icons.face, color: Colors.blue),
-          _DockItem(icon: Icons.mail, color: Colors.white),
-          _DockItem(icon: Icons.camera_alt, color: Colors.grey),
-          _DockItem(icon: Icons.music_note, color: Colors.pinkAccent),
-          _DockItem(icon: Icons.settings, color: Colors.grey),
+          _DockItem(
+            icon: Icons.face,
+            color: Colors.blue,
+            onTap: () => AppLauncherService.launch(context, AppType.cv),
+          ),
+          _DockItem(
+            icon: Icons.mail,
+            color: Colors.white,
+            onTap: () => AppLauncherService.launch(context, AppType.email),
+          ),
+          _DockItem(
+            icon: Icons.camera_alt,
+            color: Colors.grey,
+            onTap: () => AppLauncherService.launch(context, AppType.camera),
+          ),
+          _DockItem(
+            icon: Icons.music_note,
+            color: Colors.pinkAccent,
+            onTap: () => AppLauncherService.launch(context, AppType.projects),
+          ),
+          _DockItem(
+            icon: Icons.settings,
+            color: Colors.grey,
+            onTap: () => AppLauncherService.launch(context, AppType.settings),
+          ),
         ],
       ),
     );
@@ -114,7 +142,13 @@ class _MacDock extends StatelessWidget {
 class _DockItem extends StatelessWidget {
   final IconData icon;
   final Color color;
-  const _DockItem({required this.icon, required this.color});
+  final VoidCallback onTap;
+
+  const _DockItem({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +160,10 @@ class _DockItem extends StatelessWidget {
         color: color.withOpacity(0.8),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: Colors.white, size: 28),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Icon(icon, color: Colors.white, size: 28),
+      ),
     );
   }
 }
@@ -145,61 +182,21 @@ class _MacWindowManager extends StatelessWidget {
                   key: ValueKey(window.id),
                   window: window,
                   headerBuilder: (context, title, close, minimize, maximize) {
-                    return Container(
-                      height: 28,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEBEBEB),
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.red, onTap: close),
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.orange, onTap: minimize),
-                          const SizedBox(width: 8),
-                          _MacStoplight(color: Colors.green, onTap: maximize),
-                          const Spacer(),
-                          Text(title,
-                              style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w500)),
-                          const Spacer(),
-                          const SizedBox(width: 60), // Balance the stoplights
-                        ],
-                      ),
+                    return BaseWindowFrame(
+                      title: title,
+                      onClose: close,
+                      onMinimize: minimize,
+                      onMaximize: maximize,
+                      style: WindowButtonStyle.mac,
                     );
                   },
-                  child: Container(
-                    color: Colors.white,
-                    child: Center(
-                        child: Text("App Content: ${window.content.title}")),
-                  ),
+                  child: WindowContentBuilder(content: window.content),
                 );
               })
               .toList()
               .cast<Widget>(),
         );
       },
-    );
-  }
-}
-
-class _MacStoplight extends StatelessWidget {
-  final Color color;
-  final VoidCallback onTap;
-  const _MacStoplight({required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      ),
     );
   }
 }
