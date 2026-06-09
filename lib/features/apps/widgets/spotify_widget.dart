@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SpotifyWidget extends StatefulWidget {
   const SpotifyWidget({super.key});
@@ -84,16 +85,19 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
       child: Row(
         children: [
           // Album Art
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: Image.network(
-              track['albumArt']!,
+          CachedNetworkImage(
+            imageUrl: track['albumArt']!,
+            width: 32,
+            height: 32,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
               width: 32,
               height: 32,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.music_note, color: Colors.green, size: 20),
+              color: Colors.green.withOpacity(0.3),
+              child: const Icon(Icons.music_note, color: Colors.green, size: 20),
             ),
+            errorWidget: (context, url, error) =>
+                const Icon(Icons.music_note, color: Colors.green, size: 20),
           ),
           const SizedBox(width: 10),
           // Info & Controls

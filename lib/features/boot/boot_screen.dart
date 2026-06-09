@@ -43,14 +43,14 @@ class _BootScreenState extends State<BootScreen> {
     for (final line in _bootSequence) {
       if (!mounted) return;
       await Future.delayed(
-          Duration(milliseconds: line.trim().isEmpty ? 500 : 150));
+          Duration(milliseconds: line.trim().isEmpty ? 50 : 30));
       setState(() {
         _logs.add(line);
       });
       _scrollToBottom();
     }
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 300));
     if (mounted) {
       _navigateToLogin();
     }
@@ -72,7 +72,7 @@ class _BootScreenState extends State<BootScreen> {
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
-        transitionDuration: const Duration(milliseconds: 800),
+        transitionDuration: const Duration(milliseconds: 200),
       ),
     );
   }

@@ -32,16 +32,25 @@ class _GithubStatusWidgetState extends State<GithubStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+    if (_loading || _stats == null || _stats!.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.code, color: Colors.white54, size: 16),
+            SizedBox(width: 8),
+            Text(
+              'GitHub',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+        ),
       );
-    }
-
-    if (_stats == null || _stats!.isEmpty) {
-      return const Icon(Icons.error_outline, color: Colors.red, size: 20);
     }
 
     return Container(
