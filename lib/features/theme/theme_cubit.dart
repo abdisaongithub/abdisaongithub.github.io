@@ -1,6 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../os_mode/os_mode.dart';
+
+const Map<OSMode, String> kOSWallpapers = {
+  OSMode.windows: 'assets/images/windows_wallpaper.jpg',
+  OSMode.macos: 'assets/images/macos_wallpaper.png',
+  OSMode.linux: '',
+  OSMode.android: 'assets/images/android_wallpaper.jpg',
+  OSMode.ios: 'assets/images/ios_wallpaper.jpg',
+  OSMode.web: 'assets/images/macos_wallpaper.png',
+};
 
 // STATE
 class ThemeState extends Equatable {
@@ -14,7 +24,7 @@ class ThemeState extends Equatable {
 
   factory ThemeState.initial() {
     return const ThemeState(
-      wallpaper: 'assets/images/windows_wallpaper.jpg',
+      wallpaper: 'assets/images/macos_wallpaper.png',
       isDarkMode: true,
     );
   }
@@ -66,5 +76,14 @@ class ThemeCubit extends Cubit<ThemeState> {
     emit(state.copyWith(isDarkMode: newMode));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_darkModeKey, newMode);
+  }
+
+  Future<void> setWallpaperForOS(OSMode mode) async {
+    final wallpaper = kOSWallpapers[mode] ?? '';
+    if (wallpaper.isNotEmpty && wallpaper != state.wallpaper) {
+      emit(state.copyWith(wallpaper: wallpaper));
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_wallpaperKey, wallpaper);
+    }
   }
 }
