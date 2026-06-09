@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../theme/theme_cubit.dart';
 
 class IosLauncher extends StatelessWidget {
   const IosLauncher({super.key});
@@ -13,14 +15,17 @@ class IosLauncher extends StatelessWidget {
         children: [
           // Wallpaper
           Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                      'assets/images/ios_wallpaper.jpg'), // Reusing the mac/ios wallpaper asset
-                  fit: BoxFit.cover,
-                ),
-              ),
+            child: BlocBuilder<ThemeCubit, ThemeState>(
+              builder: (context, state) {
+                return Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(state.wallpaper),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 

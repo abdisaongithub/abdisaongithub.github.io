@@ -5,6 +5,7 @@ import '../../os_mode/cubit/os_mode_cubit.dart';
 import '../../os_mode/os_mode.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../theme/theme_cubit.dart';
 
 class AndroidLauncher extends StatelessWidget {
   const AndroidLauncher({super.key});
@@ -17,14 +18,17 @@ class AndroidLauncher extends StatelessWidget {
         children: [
           // Wallpaper
           Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2C3E50), Color(0xFF000000)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
+            child: BlocBuilder<ThemeCubit, ThemeState>(
+              builder: (context, state) {
+                return Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(state.wallpaper),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 

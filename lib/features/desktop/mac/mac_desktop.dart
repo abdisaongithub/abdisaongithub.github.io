@@ -8,6 +8,7 @@ import '../../virtual_window/base_window_frame.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/spotify_widget.dart';
+import '../../theme/theme_cubit.dart';
 
 class MacDesktop extends StatelessWidget {
   const MacDesktop({super.key});
@@ -24,13 +25,17 @@ class MacDesktop extends StatelessWidget {
           children: [
             // Wallpaper
             Positioned.fill(
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/macos_wallpaper.png'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+              child: BlocBuilder<ThemeCubit, ThemeState>(
+                builder: (context, state) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(state.wallpaper),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
 

@@ -11,6 +11,7 @@ import 'features/mobile/android/android_launcher.dart';
 import 'features/mobile/ios/ios_launcher.dart';
 import 'features/web/web_launcher.dart';
 import 'features/switcher/os_switcher_widget.dart';
+import 'features/theme/theme_cubit.dart';
 
 class MainOrchestrator extends StatefulWidget {
   const MainOrchestrator({super.key});
@@ -25,7 +26,11 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OSModeCubit, OSModeState>(
+    return BlocListener<OSModeCubit, OSModeState>(
+      listener: (context, state) {
+        context.read<ThemeCubit>().setWallpaperForOS(state.mode);
+      },
+      child: BlocBuilder<OSModeCubit, OSModeState>(
       builder: (context, state) {
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -64,6 +69,7 @@ class _MainOrchestratorState extends State<MainOrchestrator> {
           },
         );
       },
+    ),
     );
   }
 
