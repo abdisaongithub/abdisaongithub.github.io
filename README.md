@@ -7,10 +7,21 @@ operating system one click away.
 
 ## Structure
 
-The landing page is the default surface — hero, live GitHub stats, real
-projects, skills and contact. Entering an OS shell is an explicit choice, and
-the BIOS animation plays as the transition into it rather than as a gate in
-front of the site.
+The site boots straight into the visitor's own platform — a Windows visitor
+lands in Windows, an iPhone in iOS. The portfolio opens automatically as a
+window, so the work is on screen within a second rather than something to go
+looking for.
+
+Switching shells replays the boot transition, because watching another OS start
+up is the point.
+
+### Speedrun
+
+A ~30 second auto-playing tour is offered on arrival: windows open and drag
+themselves, the terminal types a real command, the OS switches, and it lands
+back on the work. **Skip** and **Take over** stop it instantly and leave
+everything on screen where it is. The replay button in the top-right runs it
+again.
 
 ## Curating content
 
@@ -73,7 +84,7 @@ directly for the fullscreen toggle.
 
 ```bash
 flutter analyze          # must be clean
-flutter test             # 93 tests
+flutter test             # 105 tests
 flutter build web --release --base-href /
 ```
 
@@ -107,6 +118,7 @@ State lives in four cubits, all provided at the root in `lib/main.dart`:
 | `FileSystemCubit` | Immutable `FileNode` tree — `cd`, `ls`, `mkdir`, `touch` |
 | `NowPlayingCubit` | Shared mock playback state for the OS chrome |
 | `GithubCubit` | Live profile and repo data from the GitHub API |
+| `SpeedrunCubit` | Scripted tour; drives the other cubits, injectable delays |
 
 Two indirections keep the OS shells decoupled from the apps they host:
 
@@ -176,7 +188,8 @@ lib/
 ├── main.dart                  Root providers → BootScreen
 ├── main_orchestrator.dart     OSMode → desktop, phone frame, fullscreen
 └── features/
-    ├── landing/               The default portfolio surface
+    ├── landing/sections/      Portfolio sections (render in-window)
+    ├── speedrun/              Auto-playing tour
     ├── projects/              Curated project data
     ├── command/               Ctrl-K command palette
     ├── boot/                  BIOS transition into a shell

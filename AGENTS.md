@@ -1,12 +1,28 @@
 # Abdisa Portfolio OS — Project References
 
 ## Overview
-Flutter **web** portfolio. The **landing page is the default surface**; five OS
-shells (Windows 11, macOS, Ubuntu, Android, iOS) sit behind an explicit "Enter
-the OS" action, with the BIOS animation as the transition into them.
+Flutter **web** portfolio. The app **boots straight into the visitor's detected
+platform** (Windows 11, macOS, Ubuntu, Android, iOS). There is no separate
+landing surface — the portfolio is an app **window** (`WindowContentType
+.portfolio`), auto-opened on arrival by `_FirstRun` in `main.dart`.
 
-`OSMode.web` no longer exists — the landing page replaced it. Being on the
-landing page is `OSModeState.isInOS == false`.
+`OSMode.web` and `OSModeState.isInOS` no longer exist.
+
+`setMode` **replays the boot transition** — switching OS is meant to look like
+a machine starting up. `isBooting` is true on arrival and on every switch.
+
+### Speedrun
+
+`SpeedrunCubit` performs a scripted tour: opens windows, drags and resizes one,
+pushes a command into the terminal, switches OS, focuses the portfolio. It
+drives the real cubits, so it is a genuine demo rather than a video.
+
+- Delays are injectable (`delay:`), so the whole ~30s script runs instantly in
+  tests.
+- `takeOver()` cancels between awaits and leaves state untouched.
+- The terminal consumes `state.typedCommand` via a `BlocListener` and types it
+  out character by character, then calls `commandConsumed()`.
+- **Any widget that mounts `TerminalApp` needs a `SpeedrunCubit` provider.**
 
 Web is the only supported target. `main_orchestrator.dart` uses `package:web` directly.
 
@@ -65,7 +81,8 @@ web file directly**, or the dependent widget becomes untestable.
 ### Feature Modules (all under `lib/features/`)
 | Feature | Description |
 |---------|-------------|
-| `landing/` | Default surface: nav, hero, projects, skills, OS teaser, contact |
+| `landing/sections/` | Portfolio sections. **Must size from `LayoutBuilder`, not `MediaQuery`** — they render inside an OS window, not full-page |
+| `speedrun/` | Scripted auto-playing tour + HUD |
 | `command/` | Ctrl/Cmd-K command palette |
 | `projects/` | Curated project data |
 | `boot/` | `BootScreen` — short BIOS transition into a shell (no login screen) |
@@ -90,9 +107,7 @@ things worth knowing:
 | `detected` | The visitor's real platform — never changes |
 | `isHandset` | Real device is a phone-sized touch screen |
 
-- `isInOS` / `isBooting` — landing vs shell, and the boot transition.
-  `enterOS(mode)` → boot → `bootComplete()`. `exitToLanding()` goes back.
-  `setMode` switches shells **without** replaying the boot.
+- `isBooting` — true on arrival and on every `setMode`; `bootComplete()` ends it.
 - `showsPhoneFrame` — **derived, not stored**: a mobile shell only gets wrapped
   in the simulated handset when `!isHandset`. It used to key off orientation,
   so rotating a real phone wrapped the launcher in a fake phone.
@@ -168,7 +183,7 @@ Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `goo
 - `analysis_options.yaml` — `package:flutter_lints/flutter.yaml`
 - `flutter analyze` must report **no issues** (CI uses `--fatal-infos`)
 - `dart format lib test` before committing, or CI fails
-- `flutter test` — 93 tests: filesystem, window manager, OS routing, now-playing sizing, project-data integrity (every link must be absolute https), terminal `exit`, asset bundling, and per-shell layout at three viewport widths
+- `flutter test` — 105 tests: filesystem, window manager, OS routing, now-playing sizing, project-data integrity (every link must be absolute https), terminal `exit`, asset bundling, and per-shell layout at three viewport widths
 
 ### Build & Run
 - `flutter run -d chrome` — web dev

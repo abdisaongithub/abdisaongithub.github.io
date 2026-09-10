@@ -5,6 +5,7 @@ import '../../../core/profile.dart';
 import '../../file_system/cubit/file_system_cubit.dart';
 import '../../file_system/models/file_node.dart';
 import '../../virtual_window/cubit/window_manager_cubit.dart';
+import '../../speedrun/speedrun_cubit.dart';
 import '../../virtual_window/window_content.dart';
 
 class TerminalApp extends StatefulWidget {
@@ -29,6 +30,8 @@ class _TerminalAppState extends State<TerminalApp> {
   /// Previously entered commands, newest last, navigable with arrow keys.
   final List<String> _commandHistory = [];
   int _historyCursor = 0;
+
+  bool _isTyping = false;
 
   @override
   void dispose() {
@@ -192,6 +195,26 @@ class _TerminalAppState extends State<TerminalApp> {
     return 'Content of $fileName:\n${file.content ?? ''}';
   }
 
+  /// Types [command] out one character at a time, then submits it, so the
+  /// speedrun looks like someone is actually using the terminal.
+  Future<void> _typeAndRun(String command) async {
+    if (_isTyping) return;
+    _isTyping = true;
+
+    _controller.clear();
+    for (var i = 0; i < command.length; i++) {
+      if (!mounted) return;
+      await Future<void>.delayed(const Duration(milliseconds: 55));
+      if (!mounted) return;
+      _controller.text = command.substring(0, i + 1);
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (!mounted) return;
+    _handleCommand(command);
+    _isTyping = false;
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -206,91 +229,102 @@ class _TerminalAppState extends State<TerminalApp> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FileSystemCubit, FileSystemState>(
-      builder: (context, state) {
-        return GestureDetector(
-          onTap: _focusNode.requestFocus,
-          child: Container(
-            color: Colors.black,
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: _history.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: SelectableText(
-                          _history[index],
-                          style: const TextStyle(
-                            color: Color(0xFF00FF00),
-                            fontFamily: 'Courier',
-                            fontSize: 14,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const Divider(color: Colors.grey),
-                Row(
-                  children: [
-                    Text(
-                      'abdisa@os:${state.currentPath}\$ ',
-                      style: const TextStyle(
-                        color: Color(0xFF00FF00),
-                        fontFamily: 'Courier',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Expanded(
-                      child: Shortcuts(
-                        shortcuts: const {
-                          SingleActivator(LogicalKeyboardKey.arrowUp):
-                              _HistoryIntent(-1),
-                          SingleActivator(LogicalKeyboardKey.arrowDown):
-                              _HistoryIntent(1),
-                        },
-                        child: Actions(
-                          actions: {
-                            _HistoryIntent: CallbackAction<_HistoryIntent>(
-                              onInvoke: (intent) {
-                                _recallHistory(intent.direction);
-                                return null;
-                              },
-                            ),
-                          },
-                          child: TextField(
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            autofocus: true,
+    return BlocListener<SpeedrunCubit, SpeedrunState>(
+      listenWhen: (previous, current) =>
+          current.typedCommand != null &&
+          previous.typedCommand != current.typedCommand,
+      listener: (context, state) {
+        final command = state.typedCommand;
+        if (command == null) return;
+        context.read<SpeedrunCubit>().commandConsumed();
+        _typeAndRun(command);
+      },
+      child: BlocBuilder<FileSystemCubit, FileSystemState>(
+        builder: (context, state) {
+          return GestureDetector(
+            onTap: _focusNode.requestFocus,
+            child: Container(
+              color: Colors.black,
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _history.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: SelectableText(
+                            _history[index],
                             style: const TextStyle(
                               color: Color(0xFF00FF00),
                               fontFamily: 'Courier',
+                              fontSize: 14,
                             ),
-                            cursorColor: const Color(0xFF00FF00),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              isDense: true,
-                            ),
-                            onSubmitted: (_) {
-                              _handleCommand(_controller.text);
-                              _focusNode.requestFocus();
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(color: Colors.grey),
+                  Row(
+                    children: [
+                      Text(
+                        'abdisa@os:${state.currentPath}\$ ',
+                        style: const TextStyle(
+                          color: Color(0xFF00FF00),
+                          fontFamily: 'Courier',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Expanded(
+                        child: Shortcuts(
+                          shortcuts: const {
+                            SingleActivator(LogicalKeyboardKey.arrowUp):
+                                _HistoryIntent(-1),
+                            SingleActivator(LogicalKeyboardKey.arrowDown):
+                                _HistoryIntent(1),
+                          },
+                          child: Actions(
+                            actions: {
+                              _HistoryIntent: CallbackAction<_HistoryIntent>(
+                                onInvoke: (intent) {
+                                  _recallHistory(intent.direction);
+                                  return null;
+                                },
+                              ),
                             },
+                            child: TextField(
+                              controller: _controller,
+                              focusNode: _focusNode,
+                              autofocus: true,
+                              style: const TextStyle(
+                                color: Color(0xFF00FF00),
+                                fontFamily: 'Courier',
+                              ),
+                              cursorColor: const Color(0xFF00FF00),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                isDense: true,
+                              ),
+                              onSubmitted: (_) {
+                                _handleCommand(_controller.text);
+                                _focusNode.requestFocus();
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

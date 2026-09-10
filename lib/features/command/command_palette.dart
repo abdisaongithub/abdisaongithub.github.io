@@ -11,6 +11,8 @@ import '../../core/profile.dart';
 import '../os_mode/cubit/os_mode_cubit.dart';
 import '../os_mode/os_mode.dart';
 import '../projects/project.dart';
+import '../virtual_window/cubit/window_manager_cubit.dart';
+import '../virtual_window/window_content.dart';
 
 @immutable
 class CommandAction {
@@ -82,6 +84,7 @@ class _CommandPaletteState extends State<CommandPalette> {
 
   List<CommandAction> _actionsFor(BuildContext context) {
     final osCubit = context.read<OSModeCubit>();
+    final windows = context.read<WindowManagerCubit>();
 
     return [
       CommandAction(
@@ -132,13 +135,29 @@ class _CommandPaletteState extends State<CommandPalette> {
           hint: mode == osCubit.state.detected ? 'Your platform' : null,
           icon: mode.icon,
           group: 'Operating systems',
-          run: () => osCubit.enterOS(mode),
+          run: () => osCubit.setMode(mode),
         ),
       CommandAction(
-        label: 'Back to portfolio',
-        icon: Icons.home_outlined,
+        label: 'Open portfolio',
+        icon: Icons.auto_awesome_mosaic_outlined,
         group: 'Navigation',
-        run: osCubit.exitToLanding,
+        run: () => windows.openWindow(
+          const WindowContent(
+            title: 'Portfolio — Abdisa Tsegaye',
+            type: WindowContentType.portfolio,
+          ),
+        ),
+      ),
+      CommandAction(
+        label: 'Open terminal',
+        icon: Icons.terminal_rounded,
+        group: 'Navigation',
+        run: () => windows.openWindow(
+          const WindowContent(
+            title: 'Terminal',
+            type: WindowContentType.terminal,
+          ),
+        ),
       ),
     ];
   }

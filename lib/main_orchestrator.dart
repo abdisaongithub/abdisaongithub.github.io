@@ -5,23 +5,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/web.dart' as web;
 
 import 'core/design/tokens.dart';
+import 'features/apps/app_enums.dart';
+import 'features/apps/app_launcher_service.dart';
 import 'features/boot/boot_screen.dart';
 import 'features/desktop/linux/linux_desktop.dart';
 import 'features/desktop/mac/mac_desktop.dart';
 import 'features/desktop/windows/windows_desktop.dart';
-import 'features/landing/landing_page.dart';
 import 'features/mobile/android/android_launcher.dart';
 import 'features/mobile/ios/ios_launcher.dart';
 import 'features/os_mode/cubit/os_mode_cubit.dart';
 import 'features/os_mode/os_mode.dart';
+import 'features/speedrun/speedrun_cubit.dart';
+import 'features/speedrun/speedrun_overlay.dart';
 import 'features/switcher/os_switcher_widget.dart';
 import 'features/theme/theme_cubit.dart';
 
-/// Routes between the landing page and the OS shells.
+/// Boots straight into the visitor's own platform, then renders that shell.
 ///
-/// The landing page is the default. Booting into a shell is an explicit
-/// choice, and the BIOS animation plays as the transition into it rather than
-/// as a gate in front of the site's content.
+/// The portfolio lives inside as a window, opened automatically on arrival so
+/// the work is on screen within a second rather than something to go hunting
+/// for. The speedrun is offered alongside it.
 class MainOrchestrator extends StatelessWidget {
   const MainOrchestrator({super.key});
 
@@ -44,10 +47,6 @@ class MainOrchestrator extends StatelessWidget {
   }
 
   Widget _surfaceFor(BuildContext context, OSModeState state) {
-    if (!state.isInOS) {
-      return const LandingPage(key: ValueKey('landing'));
-    }
-
     if (state.isBooting) {
       return BootScreen(
         key: const ValueKey('boot'),
@@ -86,6 +85,8 @@ class OSShell extends StatelessWidget {
                 children: [
                   _ExitToPortfolioButton(),
                   SizedBox(width: AppSpacing.sm),
+                  _ReplayTourButton(),
+                  SizedBox(width: AppSpacing.sm),
                   _FullScreenToggle(),
                 ],
               ),
@@ -94,6 +95,9 @@ class OSShell extends StatelessWidget {
           OSSwitcherWidget(
             bottomInset: _switcherInsetFor(state.mode, showsFrame),
           ),
+
+          // Above the shell chrome so it survives an OS switch mid-tour.
+          const SpeedrunOverlay(),
         ],
       ),
     );
@@ -159,9 +163,23 @@ class _ExitToPortfolioButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _GlassButton(
-      icon: Icons.arrow_back_rounded,
-      tooltip: 'Back to portfolio',
-      onTap: () => context.read<OSModeCubit>().exitToLanding(),
+      icon: Icons.auto_awesome_mosaic_outlined,
+      tooltip: 'Open portfolio',
+      onTap: () => AppLauncherService.launch(context, AppType.portfolio),
+    );
+  }
+}
+
+/// Replays the tour on demand, so it is not a one-shot a visitor can miss.
+class _ReplayTourButton extends StatelessWidget {
+  const _ReplayTourButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return _GlassButton(
+      icon: Icons.play_circle_outline_rounded,
+      tooltip: 'Watch the 30s tour',
+      onTap: () => context.read<SpeedrunCubit>().start(),
     );
   }
 }

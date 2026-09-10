@@ -9,8 +9,10 @@ import 'features/apps/services/github_service.dart';
 import 'features/command/command_palette.dart';
 import 'features/file_system/cubit/file_system_cubit.dart';
 import 'features/os_mode/cubit/os_mode_cubit.dart';
+import 'features/speedrun/speedrun_cubit.dart';
 import 'features/theme/theme_cubit.dart';
 import 'features/virtual_window/cubit/window_manager_cubit.dart';
+import 'features/virtual_window/window_content.dart';
 import 'main_orchestrator.dart';
 
 Future<void> main() async {
@@ -34,12 +36,19 @@ class PortfolioApp extends StatelessWidget {
           // One shared playback state for every surface that shows now-playing.
           BlocProvider(create: (_) => NowPlayingCubit()),
           BlocProvider(create: (context) => GithubCubit(context.read())),
+          BlocProvider(
+            create: (context) => SpeedrunCubit(
+              windows: context.read<WindowManagerCubit>(),
+              osMode: context.read<OSModeCubit>(),
+            ),
+          ),
         ],
         child: MaterialApp(
           title: 'Abdisa Tsegaye — Portfolio',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(),
-          home: const _AppShortcuts(child: MainOrchestrator()),
+          home:
+              const _AppShortcuts(child: _FirstRun(child: MainOrchestrator())),
         ),
       ),
     );
@@ -75,6 +84,47 @@ class PortfolioApp extends StatelessWidget {
       highlightColor: Colors.transparent,
     );
   }
+}
+
+/// Opens the portfolio window on arrival and offers the tour.
+///
+/// The site boots into an OS shell, so without this a visitor would land on an
+/// empty desktop with no indication of where the work is.
+class _FirstRun extends StatefulWidget {
+  final Widget child;
+
+  const _FirstRun({required this.child});
+
+  @override
+  State<_FirstRun> createState() => _FirstRunState();
+}
+
+class _FirstRunState extends State<_FirstRun> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _open());
+  }
+
+  Future<void> _open() async {
+    // Wait for the boot transition to finish before anything appears.
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+
+    context.read<WindowManagerCubit>().openWindow(
+          const WindowContent(
+            title: 'Portfolio — Abdisa Tsegaye',
+            type: WindowContentType.portfolio,
+          ),
+        );
+
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    context.read<SpeedrunCubit>().offer();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// App-wide keyboard shortcuts. Ctrl/Cmd-K opens the command palette from

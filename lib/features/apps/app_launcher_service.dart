@@ -11,6 +11,14 @@ class AppLauncherService {
     final windows = context.read<WindowManagerCubit>();
 
     switch (app) {
+      case AppType.portfolio:
+        windows.openWindow(
+          const WindowContent(
+            title: 'Portfolio — Abdisa Tsegaye',
+            type: WindowContentType.portfolio,
+          ),
+        );
+
       case AppType.cv:
         windows.openWindow(
           const WindowContent(

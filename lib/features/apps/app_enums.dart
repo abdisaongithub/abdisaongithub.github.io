@@ -1,4 +1,5 @@
 enum AppType {
+  portfolio,
   email,
   phone,
   projects,
