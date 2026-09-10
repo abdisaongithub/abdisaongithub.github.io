@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../guide/guide_anchor.dart';
+import '../guide/guide_cubit.dart';
 import '../os_mode/cubit/os_mode_cubit.dart';
 import '../os_mode/os_mode.dart';
 
@@ -15,7 +17,11 @@ import '../os_mode/os_mode.dart';
 class OSSwitcherWidget extends StatefulWidget {
   final double bottomInset;
 
-  const OSSwitcherWidget({super.key, this.bottomInset = 24});
+  /// Adds a "Show me around" entry to the menu. On phones there is no other
+  /// way back to the guide.
+  final VoidCallback? onShowGuide;
+
+  const OSSwitcherWidget({super.key, this.bottomInset = 24, this.onShowGuide});
 
   @override
   State<OSSwitcherWidget> createState() => _OSSwitcherWidgetState();
@@ -61,13 +67,22 @@ class _OSSwitcherWidgetState extends State<OSSwitcherWidget> {
                           context.read<OSModeCubit>().resetToDetected();
                           _collapse();
                         },
+                        onShowGuide: widget.onShowGuide == null
+                            ? null
+                            : () {
+                                _collapse();
+                                widget.onShowGuide!();
+                              },
                       ),
                       const SizedBox(height: 10),
                     ],
-                    _SwitcherButton(
-                      mode: state.mode,
-                      isExpanded: _isExpanded,
-                      onTap: () => setState(() => _isExpanded = !_isExpanded),
+                    GuideAnchor(
+                      target: GuideTarget.switcher,
+                      child: _SwitcherButton(
+                        mode: state.mode,
+                        isExpanded: _isExpanded,
+                        onTap: () => setState(() => _isExpanded = !_isExpanded),
+                      ),
                     ),
                   ],
                 );
@@ -120,15 +135,20 @@ class _SwitcherPanel extends StatelessWidget {
   final OSModeState state;
   final ValueChanged<OSMode> onSelected;
   final VoidCallback onReset;
+  final VoidCallback? onShowGuide;
 
   const _SwitcherPanel({
     required this.state,
     required this.onSelected,
     required this.onReset,
+    required this.onShowGuide,
   });
 
   @override
   Widget build(BuildContext context) {
+    final showReset = state.isManual && !state.isNativeShell;
+    final showGuide = onShowGuide;
+
     return _Glass(
       borderRadius: BorderRadius.circular(18),
       child: ConstrainedBox(
@@ -157,10 +177,20 @@ class _SwitcherPanel extends StatelessWidget {
                 isDetected: state.detected == mode,
                 onTap: () => onSelected(mode),
               ),
-            if (state.isManual && !state.isNativeShell) ...[
+            if (showReset || showGuide != null)
               const Divider(height: 1, color: Colors.white24),
-              _ResetRow(detected: state.detected, onTap: onReset),
-            ],
+            if (showReset)
+              _PanelAction(
+                icon: Icons.restart_alt,
+                label: 'Back to ${state.detected.shortLabel}',
+                onTap: onReset,
+              ),
+            if (showGuide != null)
+              _PanelAction(
+                icon: Icons.help_outline_rounded,
+                label: 'Show me around',
+                onTap: showGuide,
+              ),
             const SizedBox(height: 6),
           ],
         ),
@@ -271,11 +301,16 @@ class _YoursBadge extends StatelessWidget {
   }
 }
 
-class _ResetRow extends StatelessWidget {
-  final OSMode detected;
+class _PanelAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
-  const _ResetRow({required this.detected, required this.onTap});
+  const _PanelAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -288,11 +323,11 @@ class _ResetRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              const Icon(Icons.restart_alt, size: 16, color: Colors.white54),
+              Icon(icon, size: 16, color: Colors.white54),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Back to ${detected.shortLabel}',
+                  label,
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,

@@ -9,7 +9,7 @@ import 'features/apps/services/github_service.dart';
 import 'features/command/command_palette.dart';
 import 'features/file_system/cubit/file_system_cubit.dart';
 import 'features/os_mode/cubit/os_mode_cubit.dart';
-import 'features/speedrun/speedrun_cubit.dart';
+import 'features/guide/guide_cubit.dart';
 import 'features/theme/theme_cubit.dart';
 import 'features/virtual_window/cubit/window_manager_cubit.dart';
 import 'main_orchestrator.dart';
@@ -35,19 +35,13 @@ class PortfolioApp extends StatelessWidget {
           // One shared playback state for every surface that shows now-playing.
           BlocProvider(create: (_) => NowPlayingCubit()),
           BlocProvider(create: (context) => GithubCubit(context.read())),
-          BlocProvider(
-            create: (context) => SpeedrunCubit(
-              windows: context.read<WindowManagerCubit>(),
-              osMode: context.read<OSModeCubit>(),
-            ),
-          ),
+          BlocProvider(create: (_) => GuideCubit()),
         ],
         child: MaterialApp(
           title: 'Abdisa Tsegaye — Portfolio',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(),
-          home:
-              const _AppShortcuts(child: _FirstRun(child: MainOrchestrator())),
+          home: const _AppShortcuts(child: MainOrchestrator()),
         ),
       ),
     );
@@ -83,37 +77,6 @@ class PortfolioApp extends StatelessWidget {
       highlightColor: Colors.transparent,
     );
   }
-}
-
-/// Offers the guided tour a beat after the landing page settles.
-///
-/// Nothing is opened automatically and nothing is forced: the landing page is
-/// already the content, and the tour is an invitation to see the OS.
-class _FirstRun extends StatefulWidget {
-  final Widget child;
-
-  const _FirstRun({required this.child});
-
-  @override
-  State<_FirstRun> createState() => _FirstRunState();
-}
-
-class _FirstRunState extends State<_FirstRun> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _open());
-  }
-
-  Future<void> _open() async {
-    // Long enough that it reads as an offer rather than an interruption.
-    await Future<void>.delayed(const Duration(milliseconds: 2200));
-    if (!mounted) return;
-    context.read<SpeedrunCubit>().offer();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 /// App-wide keyboard shortcuts. Ctrl/Cmd-K opens the command palette from

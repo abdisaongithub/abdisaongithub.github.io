@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/design/tokens.dart';
 import '../../core/design/ui.dart';
 import '../../core/profile.dart';
-import '../speedrun/speedrun_overlay.dart';
 import 'sections/contact_section.dart';
 import 'sections/hero_section.dart';
 import 'sections/os_teaser_section.dart';
@@ -75,7 +74,6 @@ class _LandingPageState extends State<LandingPage> {
               ),
             ),
           ),
-          const SpeedrunOverlay(),
           Positioned(
             top: 0,
             left: 0,

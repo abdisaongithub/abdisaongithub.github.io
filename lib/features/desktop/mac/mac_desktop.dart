@@ -4,6 +4,8 @@ import '../../virtual_window/base_window_frame.dart';
 import '../../virtual_window/window_layer.dart';
 import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
+import '../../guide/guide_anchor.dart';
+import '../../guide/guide_cubit.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
 import '../../apps/widgets/github_status_widget.dart';
@@ -52,7 +54,9 @@ class MacDesktop extends StatelessWidget {
               bottom: 12,
               left: 0,
               right: 0,
-              child: Center(child: _MacDock()),
+              child: Center(
+                child: GuideAnchor(target: GuideTarget.apps, child: _MacDock()),
+              ),
             ),
           ],
         ),
@@ -165,11 +169,14 @@ class _MacDock extends StatelessWidget {
             tooltip: 'Files',
             onTap: () => AppLauncherService.launch(context, AppType.files),
           ),
-          _DockItem(
-            icon: Icons.terminal,
-            color: Colors.black87,
-            tooltip: 'Terminal',
-            onTap: () => AppLauncherService.launch(context, AppType.terminal),
+          GuideAnchor(
+            target: GuideTarget.terminal,
+            child: _DockItem(
+              icon: Icons.terminal,
+              color: Colors.black87,
+              tooltip: 'Terminal',
+              onTap: () => AppLauncherService.launch(context, AppType.terminal),
+            ),
           ),
           _DockItem(
             icon: Icons.mail,

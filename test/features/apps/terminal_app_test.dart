@@ -3,9 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_portfolio_app/features/apps/widgets/terminal_app.dart';
 import 'package:flutter_portfolio_app/features/file_system/cubit/file_system_cubit.dart';
-import 'package:flutter_portfolio_app/features/os_mode/cubit/os_mode_cubit.dart';
-import 'package:flutter_portfolio_app/features/os_mode/os_mode.dart';
-import 'package:flutter_portfolio_app/features/speedrun/speedrun_cubit.dart';
 import 'package:flutter_portfolio_app/features/virtual_window/cubit/window_manager_cubit.dart';
 import 'package:flutter_portfolio_app/features/virtual_window/window_content.dart';
 
@@ -31,14 +28,6 @@ void main() {
           BlocProvider.value(value: windows),
           BlocProvider(
             create: (_) => FileSystemCubit(projectLoader: EmptyLoader()),
-          ),
-          // The terminal listens for scripted commands from the speedrun.
-          BlocProvider(
-            create: (_) => SpeedrunCubit(
-              windows: windows,
-              osMode: OSModeCubit(detect: () => detectedIs(OSMode.windows)),
-              delay: (_) => Future<void>.value(),
-            ),
           ),
         ],
         child:

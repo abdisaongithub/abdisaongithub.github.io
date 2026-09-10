@@ -35,18 +35,25 @@ automatically. Rules that keep this from regressing:
    so the first seconds show the name and role rather than a blank screen. If
    you change the hero copy, change it in both places.
 
-### Speedrun
+### Guide
 
-`SpeedrunCubit` performs a scripted tour: opens windows, drags and resizes one,
-pushes a command into the terminal, switches OS, focuses the portfolio. It
-drives the real cubits, so it is a genuine demo rather than a video.
+The OS has a spotlight guide, not a scripted tour. It never clicks, types or
+navigates for the visitor: it rings a real control, says what it does, and the
+visitor does the rest.
 
-- Delays are injectable (`delay:`), so the whole ~30s script runs instantly in
-  tests.
-- `takeOver()` cancels between awaits and leaves state untouched.
-- The terminal consumes `state.typedCommand` via a `BlocListener` and types it
-  out character by character, then calls `commandConsumed()`.
-- **Any widget that mounts `TerminalApp` needs a `SpeedrunCubit` provider.**
+- Mark a control with `GuideAnchor(target: GuideTarget.x, child: ...)`. Anchors
+  register while mounted, and `GuideAnchors.available` drops steps whose
+  control is not on screen, so one step list serves every shell.
+- `GuideOverlay` must sit in a full-screen `Stack`. Its dimming ignores
+  pointers, so every control stays usable while the guide is open. It sits
+  below `OSSwitcherWidget` so the switcher menu opens above the card.
+- It opens once on first OS entry (`showOSGuideOnce`), remembered in
+  `SharedPreferences` under `guide.osSeen`. The `?` button and the switcher's
+  "Show me around" reopen it. Until then, "Enter the OS" on the landing page
+  ripples (`GuidePulse`).
+- Step copy lives in `guide/guide_steps.dart`. If you rename a terminal command
+  or a VFS file the terminal tip mentions, update the tip — a test checks it.
+- `GuideCubit.dismiss()` hides the guide; `close()` is the cubit's disposal.
 
 Web is the only supported target. `main_orchestrator.dart` uses `package:web` directly.
 
@@ -108,7 +115,7 @@ web file directly**, or the dependent widget becomes untestable.
 | `os/` | `OSSurface` — the deferred entry point for everything OS-only |
 | `landing/` | Entry surface: nav, hero, projects, skills, OS teaser, contact |
 | `landing/sections/` | Portfolio sections. **Must size from `LayoutBuilder`, not `MediaQuery`** — they render inside an OS window, not full-page |
-| `speedrun/` | Scripted auto-playing tour + HUD |
+| `guide/` | Spotlight guide: `GuideAnchor`, `GuideOverlay`, per-shell steps |
 | `command/` | Ctrl/Cmd-K command palette |
 | `projects/` | Curated project data |
 | `boot/` | `BootScreen` — short BIOS transition into a shell (no login screen) |

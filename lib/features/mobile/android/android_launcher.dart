@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/live_clock.dart';
 import '../../apps/app_enums.dart';
+import '../../guide/guide_anchor.dart';
+import '../../guide/guide_cubit.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
 import '../../desktop/desktop_wallpaper.dart';
@@ -29,53 +31,66 @@ class AndroidLauncher extends StatelessWidget {
           // App Grid
           Positioned.fill(
             top: 40,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 0.8, // More vertical space for labels
-              padding: const EdgeInsets.all(16),
-              children: [
-                _AppIcon(
-                  label: 'About',
-                  icon: Icons.person,
-                  color: Colors.blue,
-                  onTap: () => AppLauncherService.launch(context, AppType.cv),
+            // Shrink-wrapped so the guide rings the icons, not the empty
+            // screen beneath them.
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: GuideAnchor(
+                target: GuideTarget.apps,
+                child: GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.8, // More vertical space for labels
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _AppIcon(
+                      label: 'About',
+                      icon: Icons.person,
+                      color: Colors.blue,
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.cv),
+                    ),
+                    _AppIcon(
+                      label: 'Projects',
+                      icon: Icons.folder,
+                      color: Colors.amber,
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.projects),
+                    ),
+                    GuideAnchor(
+                      target: GuideTarget.terminal,
+                      child: _AppIcon(
+                        label: 'Terminal',
+                        icon: Icons.terminal,
+                        color: Colors.green,
+                        onTap: () => AppLauncherService.launch(
+                            context, AppType.terminal),
+                      ),
+                    ),
+                    _AppIcon(
+                      label: 'Contact',
+                      icon: Icons.email,
+                      color: Colors.red,
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.email),
+                    ),
+                    _AppIcon(
+                      label: 'GitHub',
+                      icon: Icons.code,
+                      color: Colors.white,
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.github),
+                    ),
+                    _AppIcon(
+                      label: 'Settings',
+                      icon: Icons.settings,
+                      color: Colors.grey,
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.settings),
+                    ),
+                  ],
                 ),
-                _AppIcon(
-                  label: 'Projects',
-                  icon: Icons.folder,
-                  color: Colors.amber,
-                  onTap: () =>
-                      AppLauncherService.launch(context, AppType.projects),
-                ),
-                _AppIcon(
-                  label: 'Terminal',
-                  icon: Icons.terminal,
-                  color: Colors.green,
-                  onTap: () =>
-                      AppLauncherService.launch(context, AppType.terminal),
-                ),
-                _AppIcon(
-                  label: 'Contact',
-                  icon: Icons.email,
-                  color: Colors.red,
-                  onTap: () =>
-                      AppLauncherService.launch(context, AppType.email),
-                ),
-                _AppIcon(
-                  label: 'GitHub',
-                  icon: Icons.code,
-                  color: Colors.white,
-                  onTap: () =>
-                      AppLauncherService.launch(context, AppType.github),
-                ),
-                _AppIcon(
-                  label: 'Settings',
-                  icon: Icons.settings,
-                  color: Colors.grey,
-                  onTap: () =>
-                      AppLauncherService.launch(context, AppType.settings),
-                ),
-              ],
+              ),
             ),
           ),
 
