@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/design/tokens.dart';
 import 'features/boot/boot_screen.dart';
+import 'features/guide/guide_cubit.dart';
 import 'features/landing/landing_page.dart';
 import 'features/os_mode/cubit/os_mode_cubit.dart';
-import 'features/speedrun/speedrun_overlay.dart';
 import 'features/theme/theme_cubit.dart';
 
 // Loaded on demand. The five shells, the window-manager UI and every windowed
@@ -23,22 +23,28 @@ class MainOrchestrator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<OSModeCubit, OSModeState>(
-      listenWhen: (previous, current) => previous.mode != current.mode,
-      listener: (context, state) {
-        context.read<ThemeCubit>().setWallpaperForOS(state.mode);
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<OSModeCubit, OSModeState>(
+          listenWhen: (previous, current) => previous.mode != current.mode,
+          listener: (context, state) {
+            context.read<ThemeCubit>().setWallpaperForOS(state.mode);
+          },
+        ),
+        // The guide describes the shell on screen, so leaving it or switching
+        // to another one ends the guide.
+        BlocListener<OSModeCubit, OSModeState>(
+          listenWhen: (previous, current) =>
+              previous.mode != current.mode ||
+              previous.isInOS != current.isInOS,
+          listener: (context, _) => context.read<GuideCubit>().dismiss(),
+        ),
+      ],
       child: BlocBuilder<OSModeCubit, OSModeState>(
         builder: (context, state) {
-          return Stack(
-            children: [
-              AnimatedSwitcher(
-                duration: AppMotion.normal,
-                child: _surfaceFor(context, state),
-              ),
-              // Above the shell so it survives an OS switch mid-tour.
-              if (state.isInOS) const SpeedrunOverlay(),
-            ],
+          return AnimatedSwitcher(
+            duration: AppMotion.normal,
+            child: _surfaceFor(context, state),
           );
         },
       ),

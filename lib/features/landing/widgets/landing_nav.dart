@@ -7,6 +7,8 @@ import '../../../core/design/tokens.dart';
 import '../../../core/design/ui.dart';
 import '../../../core/profile.dart';
 import '../../command/command_palette.dart';
+import '../../guide/guide_cubit.dart';
+import '../../guide/guide_pulse.dart';
 import '../../os_mode/cubit/os_mode_cubit.dart';
 
 class LandingNav extends StatelessWidget {
@@ -78,12 +80,19 @@ class LandingNav extends StatelessWidget {
                     const _CommandHint(),
                     const SizedBox(width: AppSpacing.sm),
                   ],
-                  AppButton(
-                    label: isCompact ? 'OS' : 'Enter the OS',
-                    icon: Icons.terminal_rounded,
-                    dense: true,
-                    onPressed: () =>
-                        context.read<OSModeCubit>().enterDetectedOS(),
+                  // A quiet ripple until the visitor has been inside once.
+                  BlocSelector<GuideCubit, GuideState, bool>(
+                    selector: (state) => !state.osGuideSeen,
+                    builder: (context, isNew) => GuidePulse(
+                      active: isNew,
+                      child: AppButton(
+                        label: isCompact ? 'OS' : 'Enter the OS',
+                        icon: Icons.terminal_rounded,
+                        dense: true,
+                        onPressed: () =>
+                            context.read<OSModeCubit>().enterDetectedOS(),
+                      ),
+                    ),
                   ),
                 ],
               ),

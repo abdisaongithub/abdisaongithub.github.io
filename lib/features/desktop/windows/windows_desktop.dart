@@ -3,6 +3,8 @@ import '../../virtual_window/base_window_frame.dart';
 import '../../virtual_window/window_layer.dart';
 import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
+import '../../guide/guide_anchor.dart';
+import '../../guide/guide_cubit.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/github_status_widget.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
@@ -34,35 +36,43 @@ class WindowsDesktop extends StatelessWidget {
               top: 20,
               bottom: 60,
               width: 100,
-              child: Column(
-                children: [
-                  _Win11Icon(
-                    label: 'About Me',
-                    icon: Icons.person_outline,
-                    onTap: () => AppLauncherService.launch(context, AppType.cv),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: GuideAnchor(
+                  target: GuideTarget.apps,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Win11Icon(
+                        label: 'About Me',
+                        icon: Icons.person_outline,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.cv),
+                      ),
+                      const SizedBox(height: 20),
+                      _Win11Icon(
+                        label: 'Projects',
+                        icon: Icons.folder_open_outlined,
+                        onTap: () => AppLauncherService.launch(
+                            context, AppType.projects),
+                      ),
+                      const SizedBox(height: 20),
+                      _Win11Icon(
+                        label: 'Files',
+                        icon: Icons.folder_open_outlined,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.files),
+                      ),
+                      const SizedBox(height: 20),
+                      _Win11Icon(
+                        label: 'Terminal',
+                        icon: Icons.terminal,
+                        onTap: () => AppLauncherService.launch(
+                            context, AppType.terminal),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  _Win11Icon(
-                    label: 'Projects',
-                    icon: Icons.folder_open_outlined,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.projects),
-                  ),
-                  const SizedBox(height: 20),
-                  _Win11Icon(
-                    label: 'Files',
-                    icon: Icons.folder_open_outlined,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.files),
-                  ),
-                  const SizedBox(height: 20),
-                  _Win11Icon(
-                    label: 'Terminal',
-                    icon: Icons.terminal,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.terminal),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -185,12 +195,15 @@ class _Win11Taskbar extends StatelessWidget {
                         AppLauncherService.launch(context, AppType.projects),
                   ),
                   const SizedBox(width: 4),
-                  _TaskbarIcon(
-                    icon: Icons.terminal,
-                    color: Colors.white,
-                    tooltip: 'Terminal',
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.terminal),
+                  GuideAnchor(
+                    target: GuideTarget.terminal,
+                    child: _TaskbarIcon(
+                      icon: Icons.terminal,
+                      color: Colors.white,
+                      tooltip: 'Terminal',
+                      onTap: () =>
+                          AppLauncherService.launch(context, AppType.terminal),
+                    ),
                   ),
                   const SizedBox(width: 4),
                   _TaskbarIcon(

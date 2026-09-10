@@ -3,6 +3,8 @@ import '../../virtual_window/base_window_frame.dart';
 import '../../virtual_window/window_layer.dart';
 import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
+import '../../guide/guide_anchor.dart';
+import '../../guide/guide_cubit.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
 import '../../apps/widgets/github_status_widget.dart';
@@ -131,29 +133,46 @@ class _UbuntuDock extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 8),
-          _DockAppIcon(
-            icon: Icons.grid_view_rounded,
-            color: Colors.white,
-            tooltip: 'Projects',
-            onTap: () => AppLauncherService.launch(context, AppType.projects),
-          ),
-          _DockAppIcon(
-            icon: Icons.folder,
-            color: Colors.orange,
-            tooltip: 'Files',
-            onTap: () => AppLauncherService.launch(context, AppType.files),
-          ),
-          _DockAppIcon(
-            icon: Icons.terminal,
-            color: Colors.white,
-            tooltip: 'Terminal',
-            onTap: () => AppLauncherService.launch(context, AppType.terminal),
-          ),
-          _DockAppIcon(
-            icon: Icons.settings,
-            color: Colors.grey,
-            tooltip: 'Settings',
-            onTap: () => AppLauncherService.launch(context, AppType.settings),
+          // Just the launchers, not the whole full-height dock, so the guide
+          // rings something the size of what it is describing.
+          GuideAnchor(
+            target: GuideTarget.apps,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _DockAppIcon(
+                  icon: Icons.grid_view_rounded,
+                  color: Colors.white,
+                  tooltip: 'Projects',
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.projects),
+                ),
+                _DockAppIcon(
+                  icon: Icons.folder,
+                  color: Colors.orange,
+                  tooltip: 'Files',
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.files),
+                ),
+                GuideAnchor(
+                  target: GuideTarget.terminal,
+                  child: _DockAppIcon(
+                    icon: Icons.terminal,
+                    color: Colors.white,
+                    tooltip: 'Terminal',
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.terminal),
+                  ),
+                ),
+                _DockAppIcon(
+                  icon: Icons.settings,
+                  color: Colors.grey,
+                  tooltip: 'Settings',
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.settings),
+                ),
+              ],
+            ),
           ),
           Container(
             height: 1,

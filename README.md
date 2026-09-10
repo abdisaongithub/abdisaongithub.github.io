@@ -27,14 +27,14 @@ Flutter web ships its own rendering engine, so there is a floor of about
 - `web/index.html` paints the hero in plain HTML/CSS before Flutter starts, so
   the first seconds show content rather than a blank screen.
 
-### Speedrun
+### Show me around
 
-A ~30 second auto-playing tour is offered on the landing page. It boots the OS
-for you, then: windows open and drag
-themselves, the terminal types a real command, the OS switches, and it lands
-back on the work. **Skip** and **Take over** stop it instantly and leave
-everything on screen where it is. The replay button in the top-right runs it
-again.
+The first time a visitor enters the OS, a spotlight points at the real
+controls one at a time — the apps, the terminal, the OS switcher and the way
+back to the portfolio — and says what each one does. Nothing moves on its own:
+every control stays usable while it is open, and **Esc** closes it. It is shown
+once. The **?** button, or "Show me around" in the OS switcher on phones, brings
+it back.
 
 ## Curating content
 
@@ -131,7 +131,7 @@ State lives in four cubits, all provided at the root in `lib/main.dart`:
 | `FileSystemCubit` | Immutable `FileNode` tree — `cd`, `ls`, `mkdir`, `touch` |
 | `NowPlayingCubit` | Shared mock playback state for the OS chrome |
 | `GithubCubit` | Profile and repo stats from the deploy-time snapshot |
-| `SpeedrunCubit` | Scripted tour; drives the other cubits, injectable delays |
+| `GuideCubit` | Which guide tip is showing; remembers the first-visit guide was seen |
 
 Two indirections keep the OS shells decoupled from the apps they host:
 
@@ -202,7 +202,7 @@ lib/
 ├── main_orchestrator.dart     OSMode → desktop, phone frame, fullscreen
 └── features/
     ├── landing/sections/      Portfolio sections (render in-window)
-    ├── speedrun/              Auto-playing tour
+    ├── guide/                 Spotlight guide for the OS
     ├── os/                    Deferred entry point for all OS-only code
     ├── projects/              Curated project data
     ├── command/               Ctrl-K command palette

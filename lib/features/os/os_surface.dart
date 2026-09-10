@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -10,11 +11,14 @@ import '../apps/app_launcher_service.dart';
 import '../desktop/linux/linux_desktop.dart';
 import '../desktop/mac/mac_desktop.dart';
 import '../desktop/windows/windows_desktop.dart';
+import '../guide/guide_anchor.dart';
+import '../guide/guide_cubit.dart';
+import '../guide/guide_overlay.dart';
+import '../guide/guide_steps.dart';
 import '../mobile/android/android_launcher.dart';
 import '../mobile/ios/ios_launcher.dart';
 import '../os_mode/cubit/os_mode_cubit.dart';
 import '../os_mode/os_mode.dart';
-import '../speedrun/speedrun_cubit.dart';
 import '../switcher/os_switcher_widget.dart';
 
 /// Everything that only exists inside an OS shell.
@@ -23,46 +27,13 @@ import '../switcher/os_switcher_widget.dart';
 /// five desktop shells, the window manager UI and every windowed app stay out
 /// of the initial JavaScript payload. A visitor who never opens the OS never
 /// downloads it.
-class OSSurface extends StatelessWidget {
+class OSSurface extends StatefulWidget {
   final OSModeState state;
 
   const OSSurface({super.key, required this.state});
 
   @override
-  Widget build(BuildContext context) {
-    final showsFrame = state.showsPhoneFrame;
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          if (showsFrame)
-            _MobileSimulator(mode: state.mode)
-          else
-            buildShell(state.mode),
-
-          // Leave / replay / fullscreen, clear of each shell's top chrome.
-          if (!state.isHandset)
-            Positioned(
-              top: _topInsetFor(state.mode, showsFrame),
-              right: 20,
-              child: const Row(
-                children: [
-                  _BackToPortfolioButton(),
-                  SizedBox(width: AppSpacing.sm),
-                  _ReplayTourButton(),
-                  SizedBox(width: AppSpacing.sm),
-                  _FullScreenToggle(),
-                ],
-              ),
-            ),
-
-          OSSwitcherWidget(
-            bottomInset: _switcherInsetFor(state.mode, showsFrame),
-          ),
-        ],
-      ),
-    );
-  }
+  State<OSSurface> createState() => _OSSurfaceState();
 
   static Widget buildShell(OSMode mode) {
     switch (mode) {
@@ -116,6 +87,85 @@ class OSSurface extends StatelessWidget {
   }
 }
 
+class _OSSurfaceState extends State<OSSurface> {
+  Timer? _firstVisit;
+
+  @override
+  void initState() {
+    super.initState();
+    // A beat after the shell fades in, so the visitor sees the desktop before
+    // anything is pointed out. Only ever shown once, never re-offered.
+    _firstVisit = Timer(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      final os = context.read<OSModeCubit>().state;
+      context.read<GuideCubit>().showOSGuideOnce(
+            () => GuideAnchors.available(
+              osGuideSteps(os.mode, isHandset: os.isHandset),
+            ),
+          );
+    });
+  }
+
+  @override
+  void dispose() {
+    _firstVisit?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
+    final showsFrame = state.showsPhoneFrame;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (showsFrame)
+            _MobileSimulator(mode: state.mode)
+          else
+            OSSurface.buildShell(state.mode),
+
+          // Leave / guide / fullscreen, clear of each shell's top chrome.
+          if (!state.isHandset)
+            Positioned(
+              top: OSSurface._topInsetFor(state.mode, showsFrame),
+              right: 20,
+              child: const Row(
+                children: [
+                  GuideAnchor(
+                    target: GuideTarget.portfolio,
+                    child: _BackToPortfolioButton(),
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  _GuideButton(),
+                  SizedBox(width: AppSpacing.sm),
+                  _FullScreenToggle(),
+                ],
+              ),
+            ),
+
+          // Below the switcher, so its menu opens above the guide card rather
+          // than underneath it.
+          const GuideOverlay(),
+
+          OSSwitcherWidget(
+            bottomInset: OSSurface._switcherInsetFor(state.mode, showsFrame),
+            onShowGuide: () => showOSGuide(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens the guide for the shell on screen, skipping controls it lacks.
+void showOSGuide(BuildContext context) {
+  final os = context.read<OSModeCubit>().state;
+  context.read<GuideCubit>().open(
+        GuideAnchors.available(osGuideSteps(os.mode, isHandset: os.isHandset)),
+      );
+}
+
 /// Without this the OS is a one-way door — there was no way back to the
 /// portfolio once you entered.
 class _BackToPortfolioButton extends StatelessWidget {
@@ -131,16 +181,16 @@ class _BackToPortfolioButton extends StatelessWidget {
   }
 }
 
-/// Replays the tour on demand, so it is not a one-shot a visitor can miss.
-class _ReplayTourButton extends StatelessWidget {
-  const _ReplayTourButton();
+/// Reopens the guide on demand, so it is not a one-shot a visitor can miss.
+class _GuideButton extends StatelessWidget {
+  const _GuideButton();
 
   @override
   Widget build(BuildContext context) {
     return _GlassButton(
-      icon: Icons.play_circle_outline_rounded,
-      tooltip: 'Watch the 30s tour',
-      onTap: () => context.read<SpeedrunCubit>().start(),
+      icon: Icons.question_mark_rounded,
+      tooltip: 'What can I do here?',
+      onTap: () => showOSGuide(context),
     );
   }
 }

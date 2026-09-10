@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/live_clock.dart';
 import '../../apps/app_enums.dart';
+import '../../guide/guide_anchor.dart';
+import '../../guide/guide_cubit.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
 import '../../desktop/desktop_wallpaper.dart';
@@ -30,56 +32,69 @@ class IosLauncher extends StatelessWidget {
           Positioned.fill(
             top: 60,
             bottom: 100,
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 0.75, // Matches the fix for Android
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 20,
-              children: [
-                _IosAppIcon(
-                    label: 'FaceTime',
-                    icon: Icons.videocam,
-                    color: Colors.green,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.camera)),
-                _IosAppIcon(
-                    label: 'Terminal',
-                    icon: Icons.terminal,
-                    color: Colors.black87,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.terminal)),
-                _IosAppIcon(
-                    label: 'GitHub',
-                    icon: Icons.code,
-                    color: Colors.black87,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.github)),
-                _IosAppIcon(
-                    label: 'Camera',
-                    icon: Icons.camera_alt,
-                    color: Colors.grey,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.camera)),
-                _IosAppIcon(
-                    label: 'Mail',
-                    icon: Icons.email,
-                    color: Colors.blue,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.email)),
-                _IosAppIcon(
-                    label: 'Projects',
-                    icon: Icons.folder_open,
-                    color: Colors.yellow,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.projects)),
-                _IosAppIcon(
-                    label: 'Settings',
-                    icon: Icons.settings,
-                    color: Colors.grey,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.settings)),
-              ],
+            // Shrink-wrapped so the guide rings the icons, not the empty
+            // screen beneath them.
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: GuideAnchor(
+                target: GuideTarget.apps,
+                child: GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.75, // Matches the fix for Android
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 20,
+                  children: [
+                    _IosAppIcon(
+                        label: 'FaceTime',
+                        icon: Icons.videocam,
+                        color: Colors.green,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.camera)),
+                    GuideAnchor(
+                      target: GuideTarget.terminal,
+                      child: _IosAppIcon(
+                          label: 'Terminal',
+                          icon: Icons.terminal,
+                          color: Colors.black87,
+                          onTap: () => AppLauncherService.launch(
+                              context, AppType.terminal)),
+                    ),
+                    _IosAppIcon(
+                        label: 'GitHub',
+                        icon: Icons.code,
+                        color: Colors.black87,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.github)),
+                    _IosAppIcon(
+                        label: 'Camera',
+                        icon: Icons.camera_alt,
+                        color: Colors.grey,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.camera)),
+                    _IosAppIcon(
+                        label: 'Mail',
+                        icon: Icons.email,
+                        color: Colors.blue,
+                        onTap: () =>
+                            AppLauncherService.launch(context, AppType.email)),
+                    _IosAppIcon(
+                        label: 'Projects',
+                        icon: Icons.folder_open,
+                        color: Colors.yellow,
+                        onTap: () => AppLauncherService.launch(
+                            context, AppType.projects)),
+                    _IosAppIcon(
+                        label: 'Settings',
+                        icon: Icons.settings,
+                        color: Colors.grey,
+                        onTap: () => AppLauncherService.launch(
+                            context, AppType.settings)),
+                  ],
+                ),
+              ),
             ),
           ),
 
