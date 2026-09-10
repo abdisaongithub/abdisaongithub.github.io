@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/live_clock.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../apps/now_playing/now_playing_widget.dart';
 import '../../desktop/desktop_wallpaper.dart';
 
 class IosLauncher extends StatelessWidget {
@@ -101,22 +103,27 @@ class _IosStatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 32.0),
+      padding: EdgeInsets.symmetric(horizontal: 28.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('9:41',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16)),
+          LiveClock(
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              height: 1.0,
+            ),
+          ),
           Row(
             children: [
-              Icon(Icons.signal_cellular_4_bar, color: Colors.white, size: 16),
+              NowPlayingWidget(variant: NowPlayingVariant.indicator),
+              SizedBox(width: 6),
+              Icon(Icons.signal_cellular_4_bar, color: Colors.white, size: 15),
               SizedBox(width: 4),
-              Icon(Icons.wifi, color: Colors.white, size: 16),
+              Icon(Icons.wifi, color: Colors.white, size: 15),
               SizedBox(width: 4),
-              Icon(Icons.battery_full, color: Colors.white, size: 16),
+              Icon(Icons.battery_full, color: Colors.white, size: 15),
             ],
           ),
         ],

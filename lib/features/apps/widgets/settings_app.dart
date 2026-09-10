@@ -61,7 +61,7 @@ class SettingsApp extends StatelessWidget {
                       if (entry.value.isNotEmpty)
                         _WallpaperOption(
                           assetPath: entry.value,
-                          label: _labelFor(entry.key),
+                          label: entry.key.label,
                         ),
                   ],
                 ),
@@ -102,7 +102,7 @@ class SettingsApp extends StatelessWidget {
                       children: [
                         for (final mode in OSMode.values)
                           ChoiceChip(
-                            label: Text(_labelFor(mode)),
+                            label: Text(mode.label),
                             selected: state.mode == mode,
                             onSelected: (_) =>
                                 context.read<OSModeCubit>().setMode(mode),
@@ -117,23 +117,6 @@ class SettingsApp extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _labelFor(OSMode mode) {
-    switch (mode) {
-      case OSMode.windows:
-        return 'Windows';
-      case OSMode.macos:
-        return 'macOS';
-      case OSMode.linux:
-        return 'Ubuntu';
-      case OSMode.android:
-        return 'Android';
-      case OSMode.ios:
-        return 'iOS';
-      case OSMode.web:
-        return 'Web';
-    }
   }
 }
 

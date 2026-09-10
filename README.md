@@ -8,7 +8,11 @@ open a terminal, browse a virtual filesystem, read code in an editor.
 
 ## What it does
 
-Six environments, switchable at any time from the floating switcher:
+The site detects your platform and boots straight into the matching shell — a
+Windows visitor gets Windows, an iPhone gets iOS. The switcher marks that shell
+**YOURS** and can always take you back to it.
+
+Six environments, switchable at any time:
 
 | Mode | What you get |
 |------|--------------|
@@ -19,7 +23,8 @@ Six environments, switchable at any time from the floating switcher:
 | **iOS** | Home screen with a frosted dock |
 | **Web** | A conventional glassmorphic landing page, for anyone who'd rather just scroll |
 
-On a desktop browser, the two mobile modes render inside a phone frame.
+On a desktop browser the two mobile modes render inside a simulated phone
+frame; on an actual phone they render full-bleed, in any orientation.
 
 ### Apps
 
@@ -28,7 +33,9 @@ On a desktop browser, the two mobile modes render inside a phone frame.
 - **VS Code** — syntax-highlighted viewer over the same virtual filesystem.
 - **Explorer** — icon grid; double-click to open files in the right app.
 - **Markdown viewer**, **Gallery**, **Settings** (wallpaper, theme, OS), **CV**.
-- **GitHub status** and a **Spotify** widget in the system chrome.
+- **GitHub status** and a **now playing** widget in the system chrome, which
+  adapts to the host: a full card in the Windows taskbar, a single line in the
+  macOS/GNOME menu bars, a glyph in phone status bars.
 
 ### Window manager
 
@@ -50,7 +57,7 @@ directly for the fullscreen toggle.
 
 ```bash
 flutter analyze          # must be clean
-flutter test             # 36 tests
+flutter test             # 79 tests
 flutter build web --release --base-href /
 ```
 
@@ -132,6 +139,8 @@ git checkout production && git merge main && git push
 ```
 lib/
 ├── core/profile.dart          Contact details, single source of truth
+├── core/platform_detector.dart  Which shell a visitor lands on
+├── core/live_clock.dart       Shared clock for every status bar
 ├── main.dart                  Root providers → BootScreen
 ├── main_orchestrator.dart     OSMode → desktop, phone frame, fullscreen
 └── features/
@@ -140,7 +149,7 @@ lib/
     ├── mobile/                android/ ios/ launchers
     ├── web/                   Glassmorphic landing page
     ├── virtual_window/        Window manager, frames, task strip
-    ├── apps/                  Terminal, editor, explorer, settings, widgets
+    ├── apps/                  Terminal, editor, explorer, settings, now playing
     ├── file_system/           FileNode tree, manifests, loader
     ├── switcher/              Floating OS picker
     └── theme/                 Wallpaper + dark mode

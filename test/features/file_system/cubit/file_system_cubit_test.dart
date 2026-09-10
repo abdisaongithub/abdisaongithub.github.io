@@ -4,12 +4,7 @@ import 'package:flutter_portfolio_app/features/file_system/models/file_node.dart
 import 'package:flutter_portfolio_app/features/file_system/models/project_manifest.dart';
 import 'package:flutter_portfolio_app/features/file_system/services/project_loader_service.dart';
 
-/// Loads no projects, so tests observe only the state they trigger themselves.
-/// The real loader kicks off an async asset read in the constructor.
-class _EmptyLoader extends ProjectLoaderService {
-  @override
-  Future<List<ProjectManifest>> loadAllProjects() async => const [];
-}
+import '../../../support/test_harness.dart';
 
 class _FakeLoader extends ProjectLoaderService {
   @override
@@ -30,7 +25,7 @@ void main() {
   group('FileSystemCubit', () {
     late FileSystemCubit cubit;
 
-    setUp(() => cubit = FileSystemCubit(projectLoader: _EmptyLoader()));
+    setUp(() => cubit = FileSystemCubit(projectLoader: EmptyLoader()));
     tearDown(() => cubit.close());
 
     test('starts in the home directory with a populated tree', () {

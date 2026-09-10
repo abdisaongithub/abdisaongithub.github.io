@@ -5,7 +5,7 @@ import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/github_status_widget.dart';
-import '../../apps/widgets/spotify_widget.dart';
+import '../../apps/now_playing/now_playing_widget.dart';
 import '../desktop_wallpaper.dart';
 
 const double _kTaskbarHeight = 48;
@@ -206,17 +206,32 @@ class _Win11Taskbar extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
+          // The tray only appears when there is genuinely room for it,
+          // otherwise it collides with the centred launcher icons.
+          Positioned(
             right: 12,
             top: 0,
             bottom: 0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SpotifyWidget(),
-                SizedBox(width: 12),
-                GithubStatusWidget(),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = MediaQuery.sizeOf(context).width;
+
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (width >= 1100) ...[
+                      const NowPlayingWidget(),
+                      const SizedBox(width: 12),
+                    ] else if (width >= 720) ...[
+                      const NowPlayingWidget(
+                        variant: NowPlayingVariant.compact,
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (width >= 620) const GithubStatusWidget(),
+                  ],
+                );
+              },
             ),
           ),
         ],
