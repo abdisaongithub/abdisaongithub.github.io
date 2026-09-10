@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 enum WindowContentType {
   profile,
@@ -12,6 +13,36 @@ enum WindowContentType {
   settings,
   markdown,
   gallery,
+}
+
+extension WindowContentTypeIcon on WindowContentType {
+  /// Icon used to represent an open window in taskbars and docks.
+  IconData get icon {
+    switch (this) {
+      case WindowContentType.profile:
+        return Icons.person_outline;
+      case WindowContentType.projectDetail:
+        return Icons.folder_open_outlined;
+      case WindowContentType.skills:
+        return Icons.bolt_outlined;
+      case WindowContentType.experience:
+        return Icons.badge_outlined;
+      case WindowContentType.contact:
+        return Icons.alternate_email;
+      case WindowContentType.webBrowser:
+        return Icons.public;
+      case WindowContentType.terminal:
+        return Icons.terminal;
+      case WindowContentType.code:
+        return Icons.code;
+      case WindowContentType.settings:
+        return Icons.settings_outlined;
+      case WindowContentType.markdown:
+        return Icons.description_outlined;
+      case WindowContentType.gallery:
+        return Icons.photo_library_outlined;
+    }
+  }
 }
 
 class WindowContent extends Equatable {

@@ -13,16 +13,17 @@ class CodeEditorApp extends StatefulWidget {
 }
 
 class _CodeEditorAppState extends State<CodeEditorApp> {
-  FileNode? _selectedFile;
+  /// Only the *id* is held, so the editor keeps pointing at the right file as
+  /// the VFS tree is rebuilt immutably. Assigning a `FileNode` inside `build`
+  /// (as this did before) mutates state during layout.
+  String? _selectedId;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<FileSystemCubit, FileSystemState>(
       builder: (context, state) {
         final allFiles = _getAllFiles(state.root);
-        if (_selectedFile == null && allFiles.isNotEmpty) {
-          _selectedFile = allFiles.first;
-        }
+        final selectedFile = _resolveSelection(allFiles);
 
         return Container(
           color: const Color(0xFF1E1E1E),
@@ -49,11 +50,12 @@ class _CodeEditorAppState extends State<CodeEditorApp> {
                     Expanded(
                       child: ListView(
                         children: allFiles.map((file) {
-                          final isSelected = file.id == _selectedFile?.id;
+                          final isSelected = file.id == selectedFile?.id;
                           return InkWell(
-                            onTap: () => setState(() => _selectedFile = file),
+                            onTap: () => setState(() => _selectedId = file.id),
                             child: Container(
-                              color: isSelected ? const Color(0xFF37373D) : null,
+                              color:
+                                  isSelected ? const Color(0xFF37373D) : null,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 8),
                               child: Row(
@@ -91,7 +93,7 @@ class _CodeEditorAppState extends State<CodeEditorApp> {
               Expanded(
                 child: Column(
                   children: [
-                    if (_selectedFile != null)
+                    if (selectedFile != null)
                       Container(
                         height: 35,
                         color: const Color(0xFF1E1E1E),
@@ -104,13 +106,13 @@ class _CodeEditorAppState extends State<CodeEditorApp> {
                               alignment: Alignment.center,
                               child: Row(
                                 children: [
-                                  Icon(_getIconForFile(_selectedFile!.name),
+                                  Icon(_getIconForFile(selectedFile.name),
                                       size: 14,
                                       color:
-                                          _getColorForFile(_selectedFile!.name)),
+                                          _getColorForFile(selectedFile.name)),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _selectedFile!.name,
+                                    selectedFile.name,
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 13),
                                   ),
@@ -124,11 +126,12 @@ class _CodeEditorAppState extends State<CodeEditorApp> {
                       child: Container(
                         width: double.infinity,
                         color: const Color(0xFF1E1E1E),
-                        child: _selectedFile != null
+                        child: selectedFile != null
                             ? SingleChildScrollView(
                                 child: HighlightView(
-                                  _selectedFile!.content ?? '',
-                                  language: _getLanguageForFile(_selectedFile!.name),
+                                  selectedFile.content ?? '',
+                                  language:
+                                      _getLanguageForFile(selectedFile.name),
                                   theme: vs2015Theme,
                                   padding: const EdgeInsets.all(16),
                                   textStyle: const TextStyle(
@@ -153,6 +156,16 @@ class _CodeEditorAppState extends State<CodeEditorApp> {
         );
       },
     );
+  }
+
+  /// Resolves the selected id against the current tree, defaulting to the
+  /// first available file.
+  FileNode? _resolveSelection(List<FileNode> files) {
+    if (files.isEmpty) return null;
+    for (final file in files) {
+      if (file.id == _selectedId) return file;
+    }
+    return files.first;
   }
 
   List<FileNode> _getAllFiles(FileNode node) {

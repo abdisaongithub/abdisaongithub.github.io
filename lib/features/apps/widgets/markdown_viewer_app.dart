@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class MarkdownViewerApp extends StatelessWidget {
   final String content;
@@ -23,8 +24,16 @@ class MarkdownViewerApp extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.copy),
-            onPressed: () {
-              // TODO: Implement copy to clipboard
+            tooltip: 'Copy to clipboard',
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: content));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Copied to clipboard'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
             },
           ),
         ],

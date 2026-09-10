@@ -15,6 +15,8 @@ class WindowContentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Exhaustive on purpose: adding a WindowContentType now fails the analyzer
+    // instead of silently rendering "Unknown Content" at runtime.
     switch (content.type) {
       case WindowContentType.markdown:
         return MarkdownViewerApp(
@@ -25,7 +27,7 @@ class WindowContentBuilder extends StatelessWidget {
         return const TerminalApp();
       case WindowContentType.gallery:
         return GalleryApp(
-          images: content.data as List<String>? ?? [],
+          images: content.data as List<String>? ?? const [],
           title: content.title,
         );
       case WindowContentType.projectDetail:
@@ -35,16 +37,38 @@ class WindowContentBuilder extends StatelessWidget {
       case WindowContentType.settings:
         return const SettingsApp();
       case WindowContentType.experience:
-        return const ExperienceApp();
       case WindowContentType.profile:
-        return const Center(child: Text("Profile App Placeholder"));
-      default:
-        return Center(child: Text("Unknown Content: ${content.type}"));
+      case WindowContentType.skills:
+        return const ExperienceApp();
+      case WindowContentType.contact:
+      case WindowContentType.webBrowser:
+        return _Placeholder(title: content.title);
     }
   }
+}
 
-  // Still keeping the static method for convenience if needed elsewhere
-  static Widget buildContent(WindowContent content) {
-    return WindowContentBuilder(content: content);
+class _Placeholder extends StatelessWidget {
+  final String title;
+
+  const _Placeholder({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.construction, size: 40, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              '$title is not available yet.',
+              style: const TextStyle(color: Colors.black54),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

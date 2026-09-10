@@ -21,6 +21,13 @@ class VirtualWindowItem extends Equatable {
     this.isFocused = true,
   });
 
+  /// Smallest window the user is allowed to resize down to.
+  static const Size minSize = Size(320, 240);
+
+  /// How much of a window must stay on screen when dragging, so a window can
+  /// never be flung somewhere it cannot be grabbed again.
+  static const double minVisible = 120;
+
   VirtualWindowItem copyWith({
     Offset? position,
     Size? size,
@@ -41,12 +48,12 @@ class VirtualWindowItem extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    content,
-    position,
-    size,
-    isMinimized,
-    isMaximized,
-    isFocused,
-  ];
+        id,
+        content,
+        position,
+        size,
+        isMinimized,
+        isMaximized,
+        isFocused,
+      ];
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
-import '../../theme/theme_cubit.dart';
+import '../../desktop/desktop_wallpaper.dart';
 
 class IosLauncher extends StatelessWidget {
   const IosLauncher({super.key});
@@ -14,20 +13,7 @@ class IosLauncher extends StatelessWidget {
       body: Stack(
         children: [
           // Wallpaper
-          Positioned.fill(
-            child: BlocBuilder<ThemeCubit, ThemeState>(
-              builder: (context, state) {
-                return Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(state.wallpaper),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          const Positioned.fill(child: DesktopWallpaper()),
 
           // Status Bar
           const Positioned(
@@ -56,17 +42,18 @@ class IosLauncher extends StatelessWidget {
                     onTap: () =>
                         AppLauncherService.launch(context, AppType.camera)),
                 _IosAppIcon(
-                    label: 'Calendar',
-                    icon: Icons.calendar_today,
-                    color: Colors.white,
-                    iconColor: Colors.red,
-                    onTap: () {}), // No calendar app yet
+                    label: 'Terminal',
+                    icon: Icons.terminal,
+                    color: Colors.black87,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.terminal)),
                 _IosAppIcon(
-                    label: 'Photos',
-                    icon: Icons.photo_library,
+                    label: 'Code',
+                    icon: Icons.code,
                     color: Colors.white,
-                    iconColor: Colors.orange,
-                    onTap: () {}), // No photos app yet
+                    iconColor: Colors.lightBlue,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.code)),
                 _IosAppIcon(
                     label: 'Camera',
                     icon: Icons.camera_alt,
@@ -100,7 +87,7 @@ class IosLauncher extends StatelessWidget {
             bottom: 20,
             left: 20,
             right: 20,
-            child: _IosDock(),
+            child: const _IosDock(),
           ),
         ],
       ),
@@ -139,6 +126,8 @@ class _IosStatusBar extends StatelessWidget {
 }
 
 class _IosDock extends StatelessWidget {
+  const _IosDock();
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -147,7 +136,7 @@ class _IosDock extends StatelessWidget {
         height: 84,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(30),
         ),
         child: Row(
@@ -178,7 +167,8 @@ class _IosDock extends StatelessWidget {
                 icon: Icons.music_note,
                 color: Colors.pink,
                 isDock: true,
-                onTap: () {}),
+                onTap: () =>
+                    AppLauncherService.launch(context, AppType.github)),
           ],
         ),
       ),
@@ -219,7 +209,7 @@ class _IosAppIcon extends StatelessWidget {
               boxShadow: [
                 if (!isDock)
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 4,
                       offset: const Offset(0, 2)),
               ],
