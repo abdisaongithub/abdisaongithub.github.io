@@ -5,7 +5,7 @@ import '../os_mode/os_mode.dart';
 
 const Map<OSMode, String> kOSWallpapers = {
   OSMode.windows: 'assets/images/windows_wallpaper.jpg',
-  OSMode.macos: 'assets/images/macos_wallpaper.png',
+  OSMode.macos: 'assets/images/macos_wallpaper.jpg',
   OSMode.linux: '',
   OSMode.android: 'assets/images/android_wallpaper.jpg',
   OSMode.ios: 'assets/images/ios_wallpaper.jpg',
@@ -23,7 +23,7 @@ class ThemeState extends Equatable {
 
   factory ThemeState.initial() {
     return const ThemeState(
-      wallpaper: 'assets/images/macos_wallpaper.png',
+      wallpaper: 'assets/images/macos_wallpaper.jpg',
       isDarkMode: true,
     );
   }

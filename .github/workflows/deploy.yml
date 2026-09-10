@@ -67,8 +67,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # --wasm serves dart2wasm + skwasm to browsers that support WasmGC and
+      # falls back to dart2js + CanvasKit elsewhere. The wasm path is ~0.4 MB
+      # smaller gzipped, and CanvasKit is the bulk of the payload.
       - name: Build Web
-        run: flutter build web --release --base-href /
+        run: flutter build web --wasm --release --base-href /
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

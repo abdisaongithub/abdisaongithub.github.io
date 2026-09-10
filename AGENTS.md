@@ -1,15 +1,39 @@
 # Abdisa Portfolio OS — Project References
 
 ## Overview
-Flutter **web** portfolio. The app **boots straight into the visitor's detected
-platform** (Windows 11, macOS, Ubuntu, Android, iOS). There is no separate
-landing surface — the portfolio is an app **window** (`WindowContentType
-.portfolio`), auto-opened on arrival by `_FirstRun` in `main.dart`.
+Flutter **web** portfolio. The **landing page is the entry point**; five OS
+shells (Windows 11, macOS, Ubuntu, Android, iOS) sit behind an explicit action.
 
-`OSMode.web` and `OSModeState.isInOS` no longer exist.
+`OSMode.web` no longer exists. Being on the landing page is
+`OSModeState.isInOS == false`.
 
-`setMode` **replays the boot transition** — switching OS is meant to look like
-a machine starting up. `isBooting` is true on arrival and on every switch.
+`setMode` replays the boot transition **only while inside the OS**.
+
+### Payload budget — read before adding anything heavy
+
+Flutter web ships its own renderer, so there is a hard floor of roughly
+**2.4 MB gzipped** on first paint. Measured:
+
+| Path | First paint (gzip) |
+|------|--------------------|
+| dart2js + CanvasKit | 2.83 MB |
+| dart2wasm + skwasm (`--wasm`) | **2.43 MB** |
+
+CI builds with `--wasm`; browsers without WasmGC fall back to the JS path
+automatically. Rules that keep this from regressing:
+
+1. **The OS surface is deferred.** `lib/features/os/os_surface.dart` is
+   imported `deferred as` from `main_orchestrator.dart`, and pulls the five
+   shells, the window-manager UI and every windowed app with it (~0.14 MB
+   gzipped). **Anything OS-only must be reachable only through that library**,
+   or it lands back in the initial bundle. The boot animation covers the
+   download — `_BootGate` waits for both.
+2. **Assets are lazy but not free.** Wallpapers are capped at 1920px (1080px
+   for phone wallpapers) and stored as JPEG. `assets/` is 715 KB total; it was
+   3.1 MB. Do not commit a PNG wallpaper.
+3. **`web/index.html` paints the hero in plain HTML/CSS** before Flutter loads,
+   so the first seconds show the name and role rather than a blank screen. If
+   you change the hero copy, change it in both places.
 
 ### Speedrun
 
@@ -81,6 +105,8 @@ web file directly**, or the dependent widget becomes untestable.
 ### Feature Modules (all under `lib/features/`)
 | Feature | Description |
 |---------|-------------|
+| `os/` | `OSSurface` — the deferred entry point for everything OS-only |
+| `landing/` | Entry surface: nav, hero, projects, skills, OS teaser, contact |
 | `landing/sections/` | Portfolio sections. **Must size from `LayoutBuilder`, not `MediaQuery`** — they render inside an OS window, not full-page |
 | `speedrun/` | Scripted auto-playing tour + HUD |
 | `command/` | Ctrl/Cmd-K command palette |
@@ -107,7 +133,9 @@ things worth knowing:
 | `detected` | The visitor's real platform — never changes |
 | `isHandset` | Real device is a phone-sized touch screen |
 
-- `isBooting` — true on arrival and on every `setMode`; `bootComplete()` ends it.
+- `isInOS` / `isBooting` — landing vs shell. `enterOS(mode)` → boot →
+  `bootComplete()`; `exitToLanding()` goes back. `bootComplete()` fires only
+  once the deferred bundle has loaded *and* the animation has played.
 - `showsPhoneFrame` — **derived, not stored**: a mobile shell only gets wrapped
   in the simulated handset when `!isHandset`. It used to key off orientation,
   so rotating a real phone wrapped the launcher in a fake phone.
@@ -183,7 +211,7 @@ Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `goo
 - `analysis_options.yaml` — `package:flutter_lints/flutter.yaml`
 - `flutter analyze` must report **no issues** (CI uses `--fatal-infos`)
 - `dart format lib test` before committing, or CI fails
-- `flutter test` — 105 tests: filesystem, window manager, OS routing, now-playing sizing, project-data integrity (every link must be absolute https), terminal `exit`, asset bundling, and per-shell layout at three viewport widths
+- `flutter test` — 107 tests: filesystem, window manager, OS routing, now-playing sizing, project-data integrity (every link must be absolute https), terminal `exit`, asset bundling, and per-shell layout at three viewport widths
 
 ### Build & Run
 - `flutter run -d chrome` — web dev

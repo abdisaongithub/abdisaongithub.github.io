@@ -42,11 +42,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icons/
-    - assets/icons/android/
-    - assets/icons/windows/
     - assets/images/
-    - assets/svg/
     # Flutter does NOT recurse into subdirectories, so each project folder
     # must be declared explicitly or its manifest.json is never bundled.
     - assets/projects/portfolio/

@@ -9,9 +9,6 @@ part 'os_mode_state.dart';
 class OSModeCubit extends Cubit<OSModeState> {
   /// [detect] is injectable so tests can pin a device instead of depending on
   /// whatever the host reports.
-  ///
-  /// The app boots straight into the visitor's own platform: a Windows visitor
-  /// lands in Windows, an iPhone in iOS.
   OSModeCubit({DeviceProfile Function()? detect})
       : super(_initialState((detect ?? PlatformDetector.detect)()));
 
@@ -20,25 +17,45 @@ class OSModeCubit extends Cubit<OSModeState> {
       mode: device.osMode,
       detected: device.osMode,
       isHandset: device.isHandset,
-      // The BIOS transition plays on arrival.
-      isBooting: true,
     );
   }
 
-  /// Called by the boot screen once its animation finishes.
+  /// Leaves the landing page and boots [mode].
+  ///
+  /// The BIOS animation covers the deferred OS bundle downloading, so the
+  /// wait is part of the experience instead of a blank screen.
+  void enterOS(OSMode mode) {
+    emit(
+      state.copyWith(
+        mode: mode,
+        isInOS: true,
+        isBooting: true,
+        isManual: mode != state.detected,
+      ),
+    );
+  }
+
+  void enterDetectedOS() => enterOS(state.detected);
+
+  /// Called once the boot animation has played and the bundle has loaded.
   void bootComplete() {
     if (!state.isBooting) return;
     emit(state.copyWith(isBooting: false));
   }
 
-  /// Switches shells. The boot transition replays, which is the point — the
-  /// visitor asked to see another operating system start up.
+  /// Returns to the landing page.
+  void exitToLanding() {
+    emit(state.copyWith(isInOS: false, isBooting: false));
+  }
+
+  /// Switches shells while already inside the OS. The boot transition replays,
+  /// because watching another operating system start up is the point.
   void setMode(OSMode mode) {
     if (mode == state.mode) return;
     emit(
       state.copyWith(
         mode: mode,
-        isBooting: true,
+        isBooting: state.isInOS,
         isManual: mode != state.detected,
       ),
     );
@@ -50,7 +67,7 @@ class OSModeCubit extends Cubit<OSModeState> {
     emit(
       state.copyWith(
         mode: state.detected,
-        isBooting: true,
+        isBooting: state.isInOS,
         isManual: false,
       ),
     );
