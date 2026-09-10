@@ -15,7 +15,6 @@ dependencies:
   equatable: ^2.0.5
 
   flutter_bloc: ^9.1.1
-  dio: ^5.3.3
   shared_preferences: ^2.2.1
 
   cached_network_image: ^3.3.0
@@ -43,6 +42,8 @@ flutter:
 
   assets:
     - assets/images/
+    # GitHub stats, generated at deploy time by tool/fetch_github_snapshot.dart.
+    - assets/data/
     # Flutter does NOT recurse into subdirectories, so each project folder
     # must be declared explicitly or its manifest.json is never bundled.
     - assets/projects/portfolio/

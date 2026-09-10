@@ -15,12 +15,12 @@ class EmptyLoader extends ProjectLoaderService {
   Future<List<ProjectManifest>> loadAllProjects() async => const [];
 }
 
-/// Answers instantly instead of hitting api.github.com, which otherwise leaves
-/// a pending timer and fails any widget test that mounts the status widget.
+/// Answers instantly with no data, for widget tests that do not care about
+/// GitHub stats.
 class OfflineGithubService extends GithubService {
   @override
-  Future<GithubProfile?> getProfile(String username) async => null;
+  Future<GithubProfile?> getProfile() async => null;
 
   @override
-  Future<List<GithubRepo>> getRepos(String username) async => const [];
+  Future<List<GithubRepo>> getRepos() async => const [];
 }

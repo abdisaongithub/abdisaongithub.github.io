@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/profile.dart';
 import '../services/github_service.dart';
 
 class GithubState extends Equatable {
@@ -65,10 +64,15 @@ class GithubCubit extends Cubit<GithubState> {
   Future<void> load() async {
     if (!isClosed) emit(state.copyWith(isLoading: true, hasFailed: false));
 
-    final results = await Future.wait([
-      _service.getProfile(Profile.username),
-      _service.getRepos(Profile.username),
-    ]);
+    // A bundled asset read, so this is fast — but it must never be able to
+    // keep the stats in a loading state, whatever happens.
+    final results = await Future.wait<Object?>([
+      _service.getProfile(),
+      _service.getRepos(),
+    ]).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => [null, const <GithubRepo>[]],
+    );
 
     if (isClosed) return;
 

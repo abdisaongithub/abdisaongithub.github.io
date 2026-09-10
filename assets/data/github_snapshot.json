@@ -1,0 +1,256 @@
+{
+  "generatedAt": "2026-09-10T22:15:29.082884Z",
+  "profile": {
+    "login": "abdisaongithub",
+    "name": "Abdisa .T",
+    "bio": null,
+    "location": "Addis Ababa, ET",
+    "public_repos": 32,
+    "followers": 11,
+    "following": 17,
+    "avatar_url": "https://avatars.githubusercontent.com/u/48585612?v=4",
+    "html_url": "https://github.com/abdisaongithub"
+  },
+  "repos": [
+    {
+      "name": "abdisaongithub.github.io",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/abdisaongithub.github.io",
+      "pushed_at": "2026-09-10T20:12:41Z"
+    },
+    {
+      "name": "express-multipart-parser",
+      "description": "An express middleware that parses multipart/form-data contents to req.body and req.files (for files).",
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/express-multipart-parser",
+      "pushed_at": "2026-06-09T22:11:51Z"
+    },
+    {
+      "name": "school_saas",
+      "description": null,
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/school_saas",
+      "pushed_at": "2026-02-17T14:04:18Z"
+    },
+    {
+      "name": "abdisaongithub",
+      "description": null,
+      "language": null,
+      "stargazers_count": 2,
+      "html_url": "https://github.com/abdisaongithub/abdisaongithub",
+      "pushed_at": "2026-02-12T11:26:34Z"
+    },
+    {
+      "name": "Convoy",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/Convoy",
+      "pushed_at": "2026-02-03T00:32:03Z"
+    },
+    {
+      "name": "google_maps_scraper",
+      "description": null,
+      "language": "Python",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/google_maps_scraper",
+      "pushed_at": "2026-02-01T09:28:16Z"
+    },
+    {
+      "name": "serverpod_sentinel",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/serverpod_sentinel",
+      "pushed_at": "2026-01-30T18:41:13Z"
+    },
+    {
+      "name": "icon_generator",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/icon_generator",
+      "pushed_at": "2026-01-27T14:34:35Z"
+    },
+    {
+      "name": "SchoolSystemMonorepo",
+      "description": "Repository for https://replit.com/@abdtsegaye/SchoolSystemMonorepo",
+      "language": "TypeScript",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/SchoolSystemMonorepo",
+      "pushed_at": "2025-12-02T08:52:15Z"
+    },
+    {
+      "name": "analytics",
+      "description": null,
+      "language": "TypeScript",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/analytics",
+      "pushed_at": "2025-10-05T11:02:57Z"
+    },
+    {
+      "name": "customer_retention_web3",
+      "description": null,
+      "language": "JavaScript",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/customer_retention_web3",
+      "pushed_at": "2024-07-15T20:08:37Z"
+    },
+    {
+      "name": "todo_mobile",
+      "description": "Project starter todo app",
+      "language": "Dart",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/todo_mobile",
+      "pushed_at": "2024-05-30T20:46:47Z"
+    },
+    {
+      "name": "100_days_challenge",
+      "description": "100 Days of UI/UX Design or Coding Challenge. Depends on where you see it from 😉",
+      "language": null,
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/100_days_challenge",
+      "pushed_at": "2024-05-28T17:43:20Z"
+    },
+    {
+      "name": "fon_tonic_mobile",
+      "description": "Mobile client for the Fon language AI Chat application",
+      "language": null,
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/fon_tonic_mobile",
+      "pushed_at": "2024-05-16T10:50:26Z"
+    },
+    {
+      "name": "dating_app",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/dating_app",
+      "pushed_at": "2024-04-18T11:17:36Z"
+    },
+    {
+      "name": "50_web_projects",
+      "description": null,
+      "language": "HTML",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/50_web_projects",
+      "pushed_at": "2024-01-08T22:49:32Z"
+    },
+    {
+      "name": "vps_setups",
+      "description": "setup script for Ubuntu 22.04 LTS",
+      "language": "Shell",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/vps_setups",
+      "pushed_at": "2023-02-14T14:52:46Z"
+    },
+    {
+      "name": "humanize_plus",
+      "description": "A dart package to display humanized numbers",
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/humanize_plus",
+      "pushed_at": "2023-01-08T19:07:27Z"
+    },
+    {
+      "name": "astu_stem_frontend",
+      "description": "Frontend application for ASTU STEM Center",
+      "language": "JavaScript",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/astu_stem_frontend",
+      "pushed_at": "2022-08-02T16:30:22Z"
+    },
+    {
+      "name": "portfolio_paulette",
+      "description": null,
+      "language": "PHP",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/portfolio_paulette",
+      "pushed_at": "2022-07-17T10:42:49Z"
+    },
+    {
+      "name": "astu_edc",
+      "description": null,
+      "language": "PHP",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/astu_edc",
+      "pushed_at": "2022-07-16T13:17:01Z"
+    },
+    {
+      "name": "ethiopian_historic_places_ar",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/ethiopian_historic_places_ar",
+      "pushed_at": "2022-07-04T14:21:45Z"
+    },
+    {
+      "name": "sew_hun",
+      "description": null,
+      "language": "JavaScript",
+      "stargazers_count": 1,
+      "html_url": "https://github.com/abdisaongithub/sew_hun",
+      "pushed_at": "2022-06-16T21:17:23Z"
+    },
+    {
+      "name": "hair_clipper",
+      "description": null,
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/hair_clipper",
+      "pushed_at": "2022-05-22T22:42:46Z"
+    },
+    {
+      "name": "exif_data_editor",
+      "description": null,
+      "language": "CMake",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/exif_data_editor",
+      "pushed_at": "2022-05-22T14:26:29Z"
+    },
+    {
+      "name": "btre_project",
+      "description": null,
+      "language": "CSS",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/btre_project",
+      "pushed_at": "2021-12-02T19:35:45Z"
+    },
+    {
+      "name": "xtask_back",
+      "description": null,
+      "language": "Python",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/xtask_back",
+      "pushed_at": "2021-09-16T22:09:34Z"
+    },
+    {
+      "name": "automated_home_safety_and_security",
+      "description": null,
+      "language": "HTML",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/automated_home_safety_and_security",
+      "pushed_at": "2021-08-25T13:10:03Z"
+    },
+    {
+      "name": "pictionary",
+      "description": "Family friendly picture guessing game",
+      "language": "Dart",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/pictionary",
+      "pushed_at": "2021-02-20T08:21:35Z"
+    },
+    {
+      "name": "devconnector",
+      "description": null,
+      "language": "JavaScript",
+      "stargazers_count": 0,
+      "html_url": "https://github.com/abdisaongithub/devconnector",
+      "pushed_at": "2021-01-14T19:47:47Z"
+    }
+  ]
+}
