@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../theme/theme_cubit.dart';
-import '../../virtual_window/cubit/window_manager_cubit.dart';
-import '../../virtual_window/window_content.dart';
-import '../../virtual_window/virtual_window_widget.dart';
-import '../../virtual_window/window_content_builder.dart';
 import '../../virtual_window/base_window_frame.dart';
+import '../../virtual_window/window_layer.dart';
+import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/widgets/github_status_widget.dart';
 import '../../apps/widgets/spotify_widget.dart';
+import '../desktop_wallpaper.dart';
+
+const double _kTaskbarHeight = 48;
 
 // CUSTOM HIGH-FIDELITY WINDOWS THEME
 class WindowsDesktop extends StatelessWidget {
@@ -19,28 +18,15 @@ class WindowsDesktop extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-        fontFamily:
-            'Segoe UI', // Windows font if available, fallback to default
+        // Windows font if available, fallback to default
+        fontFamily: 'Segoe UI',
         brightness: Brightness.light,
       ),
       child: Scaffold(
         body: Stack(
           children: [
             // Wallpaper
-            Positioned.fill(
-              child: BlocBuilder<ThemeCubit, ThemeState>(
-                builder: (context, state) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(state.wallpaper),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            const Positioned.fill(child: DesktopWallpaper()),
 
             // Desktop Icons
             Positioned(
@@ -52,48 +38,46 @@ class WindowsDesktop extends StatelessWidget {
                 children: [
                   _Win11Icon(
                     label: 'About Me',
-                    icon: Icons.person_outline, // Closest to Fluent "Contact"
-                    onTap: () {
-                      AppLauncherService.launch(context, AppType.cv);
-                    },
+                    icon: Icons.person_outline,
+                    onTap: () => AppLauncherService.launch(context, AppType.cv),
                   ),
                   const SizedBox(height: 20),
                   _Win11Icon(
                     label: 'Projects',
                     icon: Icons.folder_open_outlined,
-                    onTap: () {
-                      AppLauncherService.launch(context, AppType.projects);
-                    },
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.projects),
                   ),
                   const SizedBox(height: 20),
                   _Win11Icon(
                     label: 'Terminal',
                     icon: Icons.terminal,
-                    onTap: () {
-                      AppLauncherService.launch(context, AppType.terminal);
-                    },
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.terminal),
                   ),
                   const SizedBox(height: 20),
                   _Win11Icon(
                     label: 'VS Code',
-                    icon: Icons.code, // Placeholder for VS Code icon
-                    onTap: () {
-                      AppLauncherService.launch(context, AppType.code);
-                    },
+                    icon: Icons.code,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.code),
                   ),
                 ],
               ),
             ),
 
             // Window Manager Layer
-            const _WindowsWindowManager(),
+            const WindowLayer(
+              style: WindowButtonStyle.windows,
+              insets: EdgeInsets.only(bottom: _kTaskbarHeight),
+            ),
 
             // Taskbar
             const Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              height: 48,
+              height: _kTaskbarHeight,
               child: _Win11Taskbar(),
             ),
           ],
@@ -131,12 +115,15 @@ class _Win11IconState extends State<_Win11Icon> {
         onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(
-            color:
-                _hovering ? Colors.white.withOpacity(0.1) : Colors.transparent,
+            color: _hovering
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
-            border: _hovering
-                ? Border.all(color: Colors.white.withOpacity(0.2))
-                : Border.all(color: Colors.transparent),
+            border: Border.all(
+              color: _hovering
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.transparent,
+            ),
           ),
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -151,7 +138,10 @@ class _Win11IconState extends State<_Win11Icon> {
                   color: Colors.white,
                   fontSize: 12,
                   shadows: [
-                    Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 4),
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      blurRadius: 4,
+                    ),
                   ],
                 ),
               ),
@@ -170,37 +160,48 @@ class _Win11Taskbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color:
-            const Color(0xFF202020).withOpacity(0.85), // Mica-like transparency
+        // Mica-like transparency
+        color: const Color(0xFF202020).withValues(alpha: 0.85),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: Stack(
         children: [
           Center(
-            child: Container(
+            child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _TaskbarIcon(
-                      icon: Icons.window,
-                      color: const Color(0xFF00ADEF),
-                      onTap: () {}), // Start
-                  const SizedBox(width: 8),
+                    icon: Icons.window,
+                    color: const Color(0xFF00ADEF),
+                    tooltip: 'Start',
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.projects),
+                  ),
+                  const SizedBox(width: 4),
                   _TaskbarIcon(
-                      icon: Icons.search, color: Colors.white, onTap: () {}),
-                  const SizedBox(width: 8),
+                    icon: Icons.terminal,
+                    color: Colors.white,
+                    tooltip: 'Terminal',
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.terminal),
+                  ),
+                  const SizedBox(width: 4),
                   _TaskbarIcon(
-                      icon: Icons.web_asset,
-                      color: Colors.white,
-                      onTap: () {}), // Task view
-                  const SizedBox(width: 8),
-                  _TaskbarIcon(
-                      icon: Icons.chat_bubble_outline,
-                      color: Colors.white,
-                      onTap: () {}), // Chat
+                    icon: Icons.settings,
+                    color: Colors.white,
+                    tooltip: 'Settings',
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.settings),
+                  ),
+                  // Open windows live here, so minimizing is always reversible.
+                  const WindowTaskStrip(),
                 ],
               ),
             ),
@@ -214,7 +215,7 @@ class _Win11Taskbar extends StatelessWidget {
               children: [
                 SpotifyWidget(),
                 SizedBox(width: 12),
-                GithubStatusWidget(username: 'abdisaongithub'),
+                GithubStatusWidget(),
               ],
             ),
           ),
@@ -227,11 +228,13 @@ class _Win11Taskbar extends StatelessWidget {
 class _TaskbarIcon extends StatefulWidget {
   final IconData icon;
   final Color color;
+  final String tooltip;
   final VoidCallback onTap;
 
   const _TaskbarIcon({
     required this.icon,
     required this.color,
+    required this.tooltip,
     required this.onTap,
   });
 
@@ -248,52 +251,23 @@ class _TaskbarIconState extends State<_TaskbarIcon> {
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color:
-                _hovering ? Colors.white.withOpacity(0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(4),
+      child: Tooltip(
+        message: widget.tooltip,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _hovering
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Icon(widget.icon, color: widget.color, size: 24),
           ),
-          child: Icon(widget.icon, color: widget.color, size: 24),
         ),
       ),
-    );
-  }
-}
-
-class _WindowsWindowManager extends StatelessWidget {
-  const _WindowsWindowManager();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<WindowManagerCubit, WindowManagerState>(
-      builder: (context, state) {
-        return Stack(
-          children: state.windows
-              .map((window) {
-                return VirtualWindow(
-                  key: ValueKey(window.id),
-                  window: window,
-                  headerBuilder: (context, title, close, minimize, maximize) {
-                    return BaseWindowFrame(
-                      title: title,
-                      onClose: close,
-                      onMinimize: minimize,
-                      onMaximize: maximize,
-                      style: WindowButtonStyle.windows,
-                    );
-                  },
-                  child: WindowContentBuilder(content: window.content),
-                );
-              })
-              .toList()
-              .cast<Widget>(),
-        );
-      },
     );
   }
 }

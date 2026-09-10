@@ -1,80 +1,134 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_portfolio_app/features/file_system/cubit/file_system_cubit.dart';
 import 'package:flutter_portfolio_app/features/file_system/models/file_node.dart';
+import 'package:flutter_portfolio_app/features/file_system/models/project_manifest.dart';
+import 'package:flutter_portfolio_app/features/file_system/services/project_loader_service.dart';
+
+/// Loads no projects, so tests observe only the state they trigger themselves.
+/// The real loader kicks off an async asset read in the constructor.
+class _EmptyLoader extends ProjectLoaderService {
+  @override
+  Future<List<ProjectManifest>> loadAllProjects() async => const [];
+}
+
+class _FakeLoader extends ProjectLoaderService {
+  @override
+  Future<List<ProjectManifest>> loadAllProjects() async => const [
+        ProjectManifest(
+          id: 'demo-project',
+          title: 'Demo Project',
+          description: 'A demo.',
+          version: '1.0.0',
+          techStack: ['Dart'],
+        ),
+      ];
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
   group('FileSystemCubit', () {
-    late FileSystemCubit fileSystemCubit;
+    late FileSystemCubit cubit;
 
-    setUp(() {
-      fileSystemCubit = FileSystemCubit();
+    setUp(() => cubit = FileSystemCubit(projectLoader: _EmptyLoader()));
+    tearDown(() => cubit.close());
+
+    test('starts in the home directory with a populated tree', () {
+      expect(cubit.state.currentPath, FileSystemCubit.homePath);
+      expect(cubit.state.root.children, isNotEmpty);
+      expect(cubit.state.getNode(FileSystemCubit.projectsPath), isNotNull);
     });
 
-    tearDown(() {
-      fileSystemCubit.close();
+    test('mkdir creates a directory in the current path', () {
+      cubit.mkdir('new_folder');
+
+      final created = cubit.state.currentDirectory.children!.firstWhere(
+        (node) => node.name == 'new_folder',
+      );
+      expect(created.type, FileType.directory);
     });
 
-    test('initial state is correct', () {
-      expect(fileSystemCubit.state.currentPath, '/home/abdisa');
-      expect(fileSystemCubit.state.root.children, isNotEmpty);
+    test('touch creates a file with content', () {
+      cubit.touch('test.txt', content: 'hello');
+
+      final created = cubit.state.currentDirectory.children!.firstWhere(
+        (node) => node.name == 'test.txt',
+      );
+      expect(created.type, FileType.file);
+      expect(created.content, 'hello');
     });
 
-    blocTest<FileSystemCubit, FileSystemState>(
-      'mkdir creates a new directory in current path',
-      build: () => fileSystemCubit,
-      act: (cubit) => cubit.mkdir('new_folder'),
-      verify: (cubit) {
-        final currentDir = cubit.state.currentDirectory;
-        final newFolder = currentDir.children?.firstWhere((node) => node.name == 'new_folder');
-        expect(newFolder, isNotNull);
-        expect(newFolder!.type, FileType.directory);
-      },
-    );
+    test('mkdir and touch ignore empty names', () {
+      final before = cubit.state.currentDirectory.children!.length;
+      cubit.mkdir('');
+      cubit.touch('');
+      expect(cubit.state.currentDirectory.children!.length, before);
+    });
 
-    blocTest<FileSystemCubit, FileSystemState>(
-      'touch creates a new file in current path',
-      build: () => fileSystemCubit,
-      act: (cubit) => cubit.touch('test.txt', content: 'hello'),
-      verify: (cubit) {
-        final currentDir = cubit.state.currentDirectory;
-        final newFile = currentDir.children?.firstWhere((node) => node.name == 'test.txt');
-        expect(newFile, isNotNull);
-        expect(newFile!.type, FileType.file);
-        expect(newFile.content, 'hello');
-      },
-    );
+    test('cd navigates into a child directory', () {
+      expect(cubit.cd('projects'), isNull);
+      expect(cubit.state.currentPath, FileSystemCubit.projectsPath);
+    });
 
-    blocTest<FileSystemCubit, FileSystemState>(
-      'cd changes current path correctly',
-      build: () => fileSystemCubit,
-      act: (cubit) => cubit.cd('projects'),
-      expect: () => [
-        isA<FileSystemState>().having((state) => state.currentPath, 'currentPath', '/home/abdisa/projects'),
-      ],
-    );
+    test('cd .. navigates to the parent', () {
+      cubit.cd('projects');
+      cubit.cd('..');
+      expect(cubit.state.currentPath, FileSystemCubit.homePath);
+    });
 
-    blocTest<FileSystemCubit, FileSystemState>(
-      'cd .. navigates to parent directory',
-      build: () => fileSystemCubit,
-      act: (cubit) async {
-        cubit.cd('projects');
-        cubit.cd('..');
-      },
-      expect: () => [
-        isA<FileSystemState>().having((state) => state.currentPath, 'currentPath', '/home/abdisa/projects'),
-        isA<FileSystemState>().having((state) => state.currentPath, 'currentPath', '/home/abdisa'),
-      ],
-    );
+    test('cd .. at the root is a no-op', () {
+      cubit.cd('/');
+      cubit.cd('..');
+      expect(cubit.state.currentPath, '/');
+    });
 
-     blocTest<FileSystemCubit, FileSystemState>(
-      'cd to absolute path works',
-      build: () => fileSystemCubit,
-      act: (cubit) => cubit.cd('/'),
-      expect: () => [
-        isA<FileSystemState>().having((state) => state.currentPath, 'currentPath', '/'),
-      ],
-    );
+    test('cd handles absolute paths and ~', () {
+      cubit.cd('/');
+      expect(cubit.state.currentPath, '/');
+
+      cubit.cd(FileSystemCubit.projectsPath);
+      expect(cubit.state.currentPath, FileSystemCubit.projectsPath);
+
+      cubit.cd('~');
+      expect(cubit.state.currentPath, FileSystemCubit.homePath);
+    });
+
+    // Regression: cd used to `print` the failure and leave the caller with no
+    // way to know anything went wrong.
+    test('cd reports an error instead of silently failing', () {
+      final error = cubit.cd('nope');
+      expect(error, contains('No such file or directory'));
+      expect(cubit.state.currentPath, FileSystemCubit.homePath);
+    });
+
+    test('cd into a file reports "Not a directory"', () {
+      cubit.touch('readme.txt');
+      expect(cubit.cd('readme.txt'), contains('Not a directory'));
+    });
+
+    test('getNode returns null for a path that does not exist', () {
+      expect(cubit.state.getNode('/home/abdisa/missing'), isNull);
+    });
+  });
+
+  group('FileSystemCubit project loading', () {
+    test('mounts loaded projects under the projects directory', () async {
+      final cubit = FileSystemCubit(projectLoader: _FakeLoader());
+      addTearDown(cubit.close);
+
+      // Let the constructor's async load settle.
+      await Future<void>.delayed(Duration.zero);
+
+      final projects = cubit.state.getNode(FileSystemCubit.projectsPath);
+      final demo = projects!.children!.firstWhere(
+        (node) => node.name == 'demo-project',
+      );
+
+      expect(demo.type, FileType.directory);
+      expect(
+        demo.children!.map((node) => node.name),
+        containsAll(['manifest.json', 'README.md']),
+      );
+    });
   });
 }

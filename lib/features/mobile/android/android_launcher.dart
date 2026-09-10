@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:mobile_number/mobile_number.dart'; // Maybe useful for sim details, but simplified for now
-import '../../os_mode/cubit/os_mode_cubit.dart';
-import '../../os_mode/os_mode.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
-import '../../theme/theme_cubit.dart';
+import '../../desktop/desktop_wallpaper.dart';
 
 class AndroidLauncher extends StatelessWidget {
   const AndroidLauncher({super.key});
@@ -17,20 +13,7 @@ class AndroidLauncher extends StatelessWidget {
       body: Stack(
         children: [
           // Wallpaper
-          Positioned.fill(
-            child: BlocBuilder<ThemeCubit, ThemeState>(
-              builder: (context, state) {
-                return Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(state.wallpaper),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          const Positioned.fill(child: DesktopWallpaper()),
 
           // Status Bar (Fake)
           const Positioned(
@@ -63,11 +46,11 @@ class AndroidLauncher extends StatelessWidget {
                       AppLauncherService.launch(context, AppType.projects),
                 ),
                 _AppIcon(
-                  label: 'Skills',
-                  icon: Icons.bolt,
-                  color: Colors.yellow,
-                  // TODO: Add Skills app type or modal
-                  onTap: () {},
+                  label: 'Terminal',
+                  icon: Icons.terminal,
+                  color: Colors.green,
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.terminal),
                 ),
                 _AppIcon(
                   label: 'Contact',
@@ -170,7 +153,7 @@ class _AppIcon extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(color: color, width: 2),
             ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
@@ -8,9 +9,12 @@ import '../services/project_loader_service.dart';
 part 'file_system_state.dart';
 
 class FileSystemCubit extends Cubit<FileSystemState> {
+  static const String homePath = '/home/abdisa';
+  static const String projectsPath = '$homePath/projects';
+
   final ProjectLoaderService _projectLoader;
 
-  FileSystemCubit({ProjectLoaderService? projectLoader}) 
+  FileSystemCubit({ProjectLoaderService? projectLoader})
       : _projectLoader = projectLoader ?? ProjectLoaderService(),
         super(FileSystemState(root: FileNode.root())) {
     _initializeDefaultStructure();
@@ -59,8 +63,8 @@ class FileSystemCubit extends Cubit<FileSystemState> {
       children: [home],
     );
 
-    emit(state.copyWith(root: newRoot, currentPath: '/home/abdisa'));
-    
+    emit(state.copyWith(root: newRoot, currentPath: homePath));
+
     // Trigger async loading of projects
     _loadProjects();
   }
@@ -68,7 +72,7 @@ class FileSystemCubit extends Cubit<FileSystemState> {
   Future<void> _loadProjects() async {
     try {
       final loadedProjects = await _projectLoader.loadAllProjects();
-      
+
       for (final project in loadedProjects) {
         // Create a directory for each project
         final projectDirId = _uuid.v4();
@@ -76,7 +80,7 @@ class FileSystemCubit extends Cubit<FileSystemState> {
           id: projectDirId,
           name: project.id, // e.g., 'portfolio'
           type: FileType.directory,
-          parentId: _findNodeIdByPath('/home/abdisa/projects'),
+          parentId: _findNodeIdByPath(projectsPath),
           children: [
             // manifest.json
             FileNode(
@@ -91,16 +95,17 @@ class FileSystemCubit extends Cubit<FileSystemState> {
               id: _uuid.v4(),
               name: 'README.md',
               type: FileType.file,
-              content: '# ${project.title}\n\n${project.description}\n\nStack: ${project.techStack.join(", ")}',
+              content:
+                  '# ${project.title}\n\n${project.description}\n\nStack: ${project.techStack.join(", ")}',
               parentId: projectDirId,
             ),
           ],
         );
 
-        _addNodeToPath('/home/abdisa/projects', projectDir);
+        _addNodeToPath(projectsPath, projectDir);
       }
     } catch (e) {
-      print('Failed to load projects into VFS: $e');
+      debugPrint('Failed to load projects into VFS: $e');
     }
   }
 
@@ -109,17 +114,17 @@ class FileSystemCubit extends Cubit<FileSystemState> {
     return state.getNode(path)?.id;
   }
 
-
-  // Change Directory
-  void cd(String path) {
+  /// Change directory. Returns `null` on success, or an error message the
+  /// caller (the terminal) can print. It used to swallow failures in a `print`.
+  String? cd(String path) {
     if (path == '..') {
       _navigateUp();
-      return;
+      return null;
     }
 
-    if (path == '/') {
-      emit(state.copyWith(currentPath: '/'));
-      return;
+    if (path == '/' || path == '~') {
+      emit(state.copyWith(currentPath: path == '~' ? homePath : '/'));
+      return null;
     }
 
     // Handle relative path
@@ -132,18 +137,18 @@ class FileSystemCubit extends Cubit<FileSystemState> {
     }
 
     final node = state.getNode(targetPath);
-    if (node != null && node.isDirectory) {
-      emit(state.copyWith(currentPath: targetPath));
-    } else {
-      // Error handling can be done via side effects or a separate status field
-      print('Directory not found: $path'); 
-    }
+    if (node == null) return 'cd: $path: No such file or directory';
+    if (!node.isDirectory) return 'cd: $path: Not a directory';
+
+    emit(state.copyWith(currentPath: targetPath));
+    return null;
   }
 
   void _navigateUp() {
     if (state.currentPath == '/') return;
 
-    final parts = state.currentPath.split('/').where((p) => p.isNotEmpty).toList();
+    final parts =
+        state.currentPath.split('/').where((p) => p.isNotEmpty).toList();
     parts.removeLast();
     final newPath = parts.isEmpty ? '/' : '/${parts.join('/')}';
     emit(state.copyWith(currentPath: newPath));

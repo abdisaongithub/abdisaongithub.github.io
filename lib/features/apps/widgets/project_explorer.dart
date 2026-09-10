@@ -114,7 +114,9 @@ class _FileIcon extends StatelessWidget {
               WindowContent(
                 type: WindowContentType.gallery,
                 title: node.name,
-                data: [node.content], // Assuming content is path or base64 for now
+                data: [
+                  node.content
+                ], // Assuming content is path or base64 for now
               ),
             );
       } else {
@@ -132,7 +134,9 @@ class _FileIcon extends StatelessWidget {
     if (fileName.endsWith('.json')) return Icons.code;
     if (fileName.endsWith('.png') ||
         fileName.endsWith('.jpg') ||
-        fileName.endsWith('.jpeg')) return Icons.image;
+        fileName.endsWith('.jpeg')) {
+      return Icons.image;
+    }
     return Icons.insert_drive_file;
   }
 }

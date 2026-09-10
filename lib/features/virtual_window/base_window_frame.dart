@@ -28,7 +28,6 @@ class BaseWindowFrame extends StatelessWidget {
       case WindowButtonStyle.linux:
         return _buildLinuxFrame();
       case WindowButtonStyle.windows:
-      default:
         return _buildWindowsFrame();
     }
   }
@@ -62,7 +61,8 @@ class BaseWindowFrame extends StatelessWidget {
           ),
           const Spacer(),
           _WindowsButton(icon: Icons.remove, onTap: onMinimize),
-          _WindowsButton(icon: Icons.check_box_outline_blank, onTap: onMaximize),
+          _WindowsButton(
+              icon: Icons.check_box_outline_blank, onTap: onMaximize),
           _WindowsButton(icon: Icons.close, onTap: onClose, isClose: true),
         ],
       ),
@@ -164,7 +164,9 @@ class _WindowsButtonState extends State<_WindowsButton> {
           width: 46,
           height: 32,
           color: _hovering
-              ? (widget.isClose ? const Color(0xFFC42B1C) : const Color(0xFFE5E5E5))
+              ? (widget.isClose
+                  ? const Color(0xFFC42B1C)
+                  : const Color(0xFFE5E5E5))
               : Colors.transparent,
           child: Icon(
             widget.icon,
@@ -216,7 +218,9 @@ class _LinuxButton extends StatelessWidget {
         width: 24,
         height: 24,
         decoration: BoxDecoration(
-          color: isClose ? const Color(0xFFE95420) : Colors.white.withOpacity(0.1),
+          color: isClose
+              ? const Color(0xFFE95420)
+              : Colors.white.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 14, color: Colors.white),

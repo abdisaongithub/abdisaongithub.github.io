@@ -57,18 +57,18 @@ class _MeshBackground extends StatelessWidget {
           Positioned(
             top: -100,
             right: -100,
-            child: _PulseCircle(color: Colors.blue.withOpacity(0.2), size: 400),
+            child: _PulseCircle(
+                color: Colors.blue.withValues(alpha: 0.2), size: 400),
           ),
           Positioned(
             bottom: -150,
             left: -50,
-            child:
-                _PulseCircle(color: Colors.purple.withOpacity(0.2), size: 500),
+            child: _PulseCircle(
+                color: Colors.purple.withValues(alpha: 0.2), size: 500),
           ),
           Positioned.fill(
             child: BackdropFilter(
-              filter: ui.ImageFilter.blur(
-                  sigmaX: 30, sigmaY: 30),
+              filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(color: Colors.transparent),
             ),
           ),
@@ -152,9 +152,9 @@ class _HeroSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.blue.withOpacity(0.2)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
           ),
           child: const Text(
             'AVAILABLE FOR WORK',
@@ -249,16 +249,17 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Stack(
         children: [
           Positioned(
             top: 20,
             right: 20,
-            child: Icon(Icons.north_east, color: Colors.white30, size: 20),
+            child:
+                const Icon(Icons.north_east, color: Colors.white30, size: 20),
           ),
           Padding(
             padding: const EdgeInsets.all(32.0),
@@ -294,9 +295,9 @@ class _WebDock extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 40),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(40),
@@ -307,10 +308,10 @@ class _WebDock extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _DockIcon(Icons.home_filled),
-                _DockIcon(Icons.grid_view_rounded),
-                _DockIcon(Icons.person_rounded),
-                _DockIcon(Icons.mail_rounded),
+                _dockIcon(Icons.home_filled),
+                _dockIcon(Icons.grid_view_rounded),
+                _dockIcon(Icons.person_rounded),
+                _dockIcon(Icons.mail_rounded),
               ],
             ),
           ),
@@ -319,7 +320,7 @@ class _WebDock extends StatelessWidget {
     );
   }
 
-  Widget _DockIcon(IconData icon) {
+  Widget _dockIcon(IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Icon(icon, color: Colors.white70, size: 24),

@@ -18,17 +18,20 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
     {
       'title': 'Blinding Lights',
       'artist': 'The Weeknd',
-      'albumArt': 'https://upload.wikimedia.org/wikipedia/en/e/e6/The_Weeknd_-_Blinding_Lights.png'
+      'albumArt':
+          'https://upload.wikimedia.org/wikipedia/en/e/e6/The_Weeknd_-_Blinding_Lights.png'
     },
     {
       'title': 'Starboy',
       'artist': 'The Weeknd',
-      'albumArt': 'https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png'
+      'albumArt':
+          'https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png'
     },
     {
       'title': 'Save Your Tears',
       'artist': 'The Weeknd',
-      'albumArt': 'https://upload.wikimedia.org/wikipedia/en/b/b2/The_Weeknd_-_Save_Your_Tears.png'
+      'albumArt':
+          'https://upload.wikimedia.org/wikipedia/en/b/b2/The_Weeknd_-_Save_Your_Tears.png'
     }
   ];
 
@@ -65,7 +68,8 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
 
   void _prevTrack() {
     setState(() {
-      _currentTrackIndex = (_currentTrackIndex - 1 + _tracks.length) % _tracks.length;
+      _currentTrackIndex =
+          (_currentTrackIndex - 1 + _tracks.length) % _tracks.length;
       _progress = 0.0;
     });
   }
@@ -75,10 +79,10 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
     final track = _tracks[_currentTrackIndex];
 
     return Container(
-      width: 220,
+      width: 260,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white12),
       ),
@@ -93,8 +97,9 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
             placeholder: (context, url) => Container(
               width: 32,
               height: 32,
-              color: Colors.green.withOpacity(0.3),
-              child: const Icon(Icons.music_note, color: Colors.green, size: 20),
+              color: Colors.green.withValues(alpha: 0.3),
+              child:
+                  const Icon(Icons.music_note, color: Colors.green, size: 20),
             ),
             errorWidget: (context, url, error) =>
                 const Icon(Icons.music_note, color: Colors.green, size: 20),
@@ -136,17 +141,53 @@ class _SpotifyWidgetState extends State<SpotifyWidget> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          // Play/Pause
-          GestureDetector(
+          const SizedBox(width: 6),
+          // Transport controls
+          _ControlButton(
+            icon: Icons.skip_previous,
+            tooltip: 'Previous',
+            onTap: _prevTrack,
+          ),
+          _ControlButton(
+            icon: _isPlaying ? Icons.pause : Icons.play_arrow,
+            tooltip: _isPlaying ? 'Pause' : 'Play',
             onTap: () => setState(() => _isPlaying = !_isPlaying),
-            child: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-              size: 18,
-            ),
+          ),
+          _ControlButton(
+            icon: Icons.skip_next,
+            tooltip: 'Next',
+            onTap: _nextTrack,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ControlButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _ControlButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Icon(icon, color: Colors.white, size: 16),
+          ),
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../models/project_manifest.dart';
 
@@ -21,7 +22,7 @@ class ProjectLoaderService {
 
   /// Scans the assets/projects directory (simulated via known list for now
   /// since Flutter Web assets are static) and returns all manifests.
-  /// 
+  ///
   /// In a real dynamic scenario, we might fetch a master 'index.json' first.
   Future<List<ProjectManifest>> loadAllProjects() async {
     // TODO: In the future, generate an index.json during build to avoid hardcoding paths.
@@ -40,7 +41,7 @@ class ProjectLoaderService {
         projects.add(project);
       } catch (e) {
         // Log error but continue loading others
-        print('Error loading project $path: $e');
+        debugPrint('Error loading project $path: $e');
       }
     }
 

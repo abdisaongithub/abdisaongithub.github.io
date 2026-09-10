@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/profile.dart';
 import '../services/github_service.dart';
 
 class GithubStatusWidget extends StatefulWidget {
   final String username;
-  const GithubStatusWidget({super.key, required this.username});
+  const GithubStatusWidget({super.key, this.username = Profile.username});
 
   @override
   State<GithubStatusWidget> createState() => _GithubStatusWidgetState();
@@ -36,7 +37,7 @@ class _GithubStatusWidgetState extends State<GithubStatusWidget> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(
@@ -56,7 +57,7 @@ class _GithubStatusWidgetState extends State<GithubStatusWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

@@ -26,5 +26,18 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Local tool output — these were committed by accident and went stale,
+# still referencing packages the project no longer depends on.
+analysis_output.txt
+pub_get_error.txt
+*.log
+
 .agent/
 docs/

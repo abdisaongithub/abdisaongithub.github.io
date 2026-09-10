@@ -28,7 +28,7 @@ class _OSSwitcherWidgetState extends State<OSSwitcherWidget> {
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   spreadRadius: 1,
                 ),
@@ -41,9 +41,10 @@ class _OSSwitcherWidgetState extends State<OSSwitcherWidget> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border:
+                        Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -121,9 +122,9 @@ class _OSSwitcherTileState extends State<_OSSwitcherTile> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? Colors.white.withOpacity(0.25)
+                ? Colors.white.withValues(alpha: 0.25)
                 : (_isHovering
-                    ? Colors.white.withOpacity(0.1)
+                    ? Colors.white.withValues(alpha: 0.1)
                     : Colors.transparent),
             shape: BoxShape.circle,
           ),
