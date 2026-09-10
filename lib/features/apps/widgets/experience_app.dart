@@ -1,163 +1,180 @@
 import 'package:flutter/material.dart';
-// import 'package:url_launcher/url_launcher.dart'; // For PDF download if we add it back
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/design/tokens.dart';
+import '../../../core/design/ui.dart';
+import '../../../core/profile.dart';
+import '../../projects/project.dart';
+import 'copy_email_row.dart';
+
+/// The CV app.
+///
+/// The employment history below is still placeholder — swap `kExperience` for
+/// real roles when you have them.
 class ExperienceApp extends StatelessWidget {
   const ExperienceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          // Header
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.blueAccent,
-                child: Icon(Icons.person, color: Colors.white, size: 30),
+    return ColoredBox(
+      color: AppColors.bg,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _Header(),
+            const SizedBox(height: AppSpacing.lg),
+            const Divider(height: 1, color: AppColors.border),
+            const SizedBox(height: AppSpacing.lg),
+            Text('EXPERIENCE', style: AppText.eyebrow),
+            const SizedBox(height: AppSpacing.md),
+            for (final role in kExperience) _TimelineItem(role: role),
+            const SizedBox(height: AppSpacing.md),
+            Text('SKILLS', style: AppText.eyebrow),
+            const SizedBox(height: AppSpacing.md),
+            for (final group in kSkills.entries) ...[
+              Text(
+                group.key,
+                style: AppText.bodySm.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(width: 16),
-              Column(
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final skill in group.value) AppChip(label: skill),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.accentSoft,
+                borderRadius: AppRadius.allMd,
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: 0.4),
+                ),
+              ),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                color: AppColors.accentBright,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(Profile.name, style: AppText.h2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Abdisa Tsegaye',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Portfolio & Experience',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    '${Profile.tagline} · ${Profile.location}',
+                    style: AppText.bodySm,
                   ),
                 ],
               ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Implement PDF Download
-                  // launchUrl(Uri.parse('path/to/resume.pdf'));
-                },
-                icon: const Icon(Icons.download),
-                label: const Text('Download PDF'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            AppButton(
+              label: 'Email',
+              icon: Icons.mail_outline_rounded,
+              dense: true,
+              onPressed: () => launchUrl(
+                Uri(
+                  scheme: 'mailto',
+                  path: Profile.email,
+                  query: 'subject=Role opportunity',
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          const Divider(),
-          const SizedBox(height: 16),
-
-          // Timeline
-          const _TimelineItem(
-            year: '2024 - Present',
-            title: 'Senior Flutter Developer',
-            company: 'Tech Innovations Inc.',
-            description:
-                'Leading a team of 5 developers building cross-platform apps. Implemented CI/CD pipelines and improved app performance by 40%.',
-            isLast: false,
-          ),
-          const _TimelineItem(
-            year: '2022 - 2024',
-            title: 'Mobile App Developer',
-            company: 'Creative Solutions',
-            description:
-                'Developed 3 major apps for fintech clients. Specialized in complex animations and state management with Bloc.',
-            isLast: false,
-          ),
-          const _TimelineItem(
-            year: '2020 - 2022',
-            title: 'Junior Developer',
-            company: 'StartUp Hub',
-            description:
-                'Collaborated on the MVP of a delivery app. Learned Flutter, Firebase, and Agile methodologies.',
-            isLast: true,
-          ),
-        ],
-      ),
+            ),
+            const CopyEmailRow(),
+            AppButton(
+              label: 'GitHub',
+              icon: Icons.code_rounded,
+              variant: AppButtonVariant.secondary,
+              dense: true,
+              onPressed: () => launchUrl(
+                Uri.parse(Profile.githubUrl),
+                webOnlyWindowName: '_blank',
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
 class _TimelineItem extends StatelessWidget {
-  final String year;
-  final String title;
-  final String company;
-  final String description;
-  final bool isLast;
+  final Role role;
 
-  const _TimelineItem({
-    required this.year,
-    required this.title,
-    required this.company,
-    required this.description,
-    this.isLast = false,
-  });
+  const _TimelineItem({required this.role});
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Date & Line
-          SizedBox(
-            width: 80,
-            child: Column(
-              children: [
-                Text(
-                  year,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.blueAccent),
-                  textAlign: TextAlign.right,
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: isLast
-                      ? const SizedBox.shrink()
-                      : Container(width: 2, color: Colors.grey[300]),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: AppColors.accent,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          // Dot & Content
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: const BoxDecoration(
-                        color: Colors.blueAccent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 24.0, top: 4, bottom: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(company,
-                          style: const TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.black87)),
-                      const SizedBox(height: 8),
-                      Text(description,
-                          style: const TextStyle(color: Colors.black54)),
-                    ],
+                Text(role.title, style: AppText.h3),
+                const SizedBox(height: 2),
+                Text(
+                  '${role.company} · ${role.period}',
+                  style: AppText.bodySm.copyWith(
+                    color: AppColors.textTertiary,
+                    fontSize: 12.5,
                   ),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(role.description, style: AppText.bodySm),
               ],
             ),
           ),
@@ -166,3 +183,38 @@ class _TimelineItem extends StatelessWidget {
     );
   }
 }
+
+@immutable
+class Role {
+  final String period;
+  final String title;
+  final String company;
+  final String description;
+
+  const Role({
+    required this.period,
+    required this.title,
+    required this.company,
+    required this.description,
+  });
+}
+
+/// PLACEHOLDER — replace with real roles.
+const List<Role> kExperience = [
+  Role(
+    period: '2024 — Present',
+    title: 'Senior Flutter Developer',
+    company: 'Placeholder',
+    description:
+        'Placeholder entry. Replace kExperience in experience_app.dart with '
+        'real roles, dates and outcomes.',
+  ),
+  Role(
+    period: '2022 — 2024',
+    title: 'Mobile App Developer',
+    company: 'Placeholder',
+    description:
+        'Placeholder entry. Replace kExperience in experience_app.dart with '
+        'real roles, dates and outcomes.',
+  ),
+];

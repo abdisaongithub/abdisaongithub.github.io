@@ -50,12 +50,11 @@ class IosLauncher extends StatelessWidget {
                     onTap: () =>
                         AppLauncherService.launch(context, AppType.terminal)),
                 _IosAppIcon(
-                    label: 'Code',
+                    label: 'GitHub',
                     icon: Icons.code,
-                    color: Colors.white,
-                    iconColor: Colors.lightBlue,
+                    color: Colors.black87,
                     onTap: () =>
-                        AppLauncherService.launch(context, AppType.code)),
+                        AppLauncherService.launch(context, AppType.github)),
                 _IosAppIcon(
                     label: 'Camera',
                     icon: Icons.camera_alt,
@@ -187,7 +186,6 @@ class _IosAppIcon extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color color;
-  final dynamic iconColor; // Can be Color or "multicolor"
   final bool isDock;
   final VoidCallback onTap;
 
@@ -196,7 +194,6 @@ class _IosAppIcon extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.onTap,
-    this.iconColor,
     this.isDock = false,
   });
 
@@ -223,9 +220,7 @@ class _IosAppIcon extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: iconColor is Color
-                  ? iconColor
-                  : (color == Colors.white ? Colors.blue : Colors.white),
+              color: color == Colors.white ? Colors.blue : Colors.white,
               size: isDock ? 32 : 36,
             ),
           ),

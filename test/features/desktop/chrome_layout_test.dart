@@ -5,13 +5,13 @@ import 'package:flutter_portfolio_app/features/desktop/linux/linux_desktop.dart'
 import 'package:flutter_portfolio_app/features/desktop/mac/mac_desktop.dart';
 import 'package:flutter_portfolio_app/features/desktop/windows/windows_desktop.dart';
 import 'package:flutter_portfolio_app/features/apps/now_playing/now_playing_cubit.dart';
+import 'package:flutter_portfolio_app/features/apps/github/github_cubit.dart';
 import 'package:flutter_portfolio_app/features/apps/services/github_service.dart';
 import 'package:flutter_portfolio_app/features/file_system/cubit/file_system_cubit.dart';
 import 'package:flutter_portfolio_app/features/mobile/android/android_launcher.dart';
 import 'package:flutter_portfolio_app/features/mobile/ios/ios_launcher.dart';
 import 'package:flutter_portfolio_app/features/os_mode/cubit/os_mode_cubit.dart';
 import 'package:flutter_portfolio_app/features/os_mode/os_mode.dart';
-import 'package:flutter_portfolio_app/features/web/web_launcher.dart';
 import 'package:flutter_portfolio_app/features/theme/theme_cubit.dart';
 import 'package:flutter_portfolio_app/features/virtual_window/cubit/window_manager_cubit.dart';
 
@@ -37,7 +37,6 @@ void main() {
     'Ubuntu': const LinuxDesktop(),
     'Android': const AndroidLauncher(),
     'iOS': const IosLauncher(),
-    'Web': const WebLauncher(),
   };
 
   for (final shell in shells.entries) {
@@ -58,6 +57,10 @@ void main() {
                       OSModeCubit(detect: () => detectedIs(OSMode.windows)),
                 ),
                 BlocProvider(create: (_) => NowPlayingCubit(autoStart: false)),
+                BlocProvider(
+                  create: (_) =>
+                      GithubCubit(OfflineGithubService(), autoLoad: false),
+                ),
                 BlocProvider(create: (_) => WindowManagerCubit()),
                 BlocProvider(create: (_) => ThemeCubit()),
                 BlocProvider(

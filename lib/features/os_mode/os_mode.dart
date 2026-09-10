@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
-enum OSMode { windows, macos, linux, android, ios, web }
+/// The operating-system shells the app can render.
+///
+/// `web` used to be a member here — a landing page pretending to be an OS.
+/// The landing page is now the default surface rather than one shell among
+/// six, so it lives outside this enum (see [OSModeState.isInOS]).
+enum OSMode { windows, macos, linux, android, ios }
 
 extension OSModeInfo on OSMode {
   /// Human-facing name. `mode.name.toUpperCase()` used to render these as
@@ -17,8 +22,6 @@ extension OSModeInfo on OSMode {
         return 'Android';
       case OSMode.ios:
         return 'iOS';
-      case OSMode.web:
-        return 'Web';
     }
   }
 
@@ -38,8 +41,6 @@ extension OSModeInfo on OSMode {
         return Icons.android;
       case OSMode.ios:
         return Icons.phone_iphone;
-      case OSMode.web:
-        return Icons.language;
     }
   }
 

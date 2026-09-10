@@ -50,17 +50,17 @@ class WindowsDesktop extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   _Win11Icon(
+                    label: 'Files',
+                    icon: Icons.folder_open_outlined,
+                    onTap: () =>
+                        AppLauncherService.launch(context, AppType.files),
+                  ),
+                  const SizedBox(height: 20),
+                  _Win11Icon(
                     label: 'Terminal',
                     icon: Icons.terminal,
                     onTap: () =>
                         AppLauncherService.launch(context, AppType.terminal),
-                  ),
-                  const SizedBox(height: 20),
-                  _Win11Icon(
-                    label: 'VS Code',
-                    icon: Icons.code,
-                    onTap: () =>
-                        AppLauncherService.launch(context, AppType.code),
                   ),
                 ],
               ),

@@ -4,17 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/web.dart' as web;
 
-import 'features/os_mode/cubit/os_mode_cubit.dart';
-import 'features/os_mode/os_mode.dart';
-import 'features/desktop/windows/windows_desktop.dart';
-import 'features/desktop/mac/mac_desktop.dart';
+import 'core/design/tokens.dart';
+import 'features/boot/boot_screen.dart';
 import 'features/desktop/linux/linux_desktop.dart';
+import 'features/desktop/mac/mac_desktop.dart';
+import 'features/desktop/windows/windows_desktop.dart';
+import 'features/landing/landing_page.dart';
 import 'features/mobile/android/android_launcher.dart';
 import 'features/mobile/ios/ios_launcher.dart';
-import 'features/web/web_launcher.dart';
+import 'features/os_mode/cubit/os_mode_cubit.dart';
+import 'features/os_mode/os_mode.dart';
 import 'features/switcher/os_switcher_widget.dart';
 import 'features/theme/theme_cubit.dart';
 
+/// Routes between the landing page and the OS shells.
+///
+/// The landing page is the default. Booting into a shell is an explicit
+/// choice, and the BIOS animation plays as the transition into it rather than
+/// as a gate in front of the site's content.
 class MainOrchestrator extends StatelessWidget {
   const MainOrchestrator({super.key});
 
@@ -27,42 +34,84 @@ class MainOrchestrator extends StatelessWidget {
       },
       child: BlocBuilder<OSModeCubit, OSModeState>(
         builder: (context, state) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              // A real phone always gets the launcher full-bleed; the simulated
-              // handset frame is only for previewing mobile on a bigger screen.
-              final showsFrame = state.showsPhoneFrame;
-
-              return Scaffold(
-                body: Stack(
-                  children: [
-                    // 1. The active OS Content
-                    if (showsFrame)
-                      _MobileSimulator(mode: state.mode)
-                    else
-                      _buildBGLayer(state.mode),
-
-                    // 2. Full Screen Toggle (hidden on handsets, where the
-                    //    browser chrome already handles this)
-                    if (!state.isHandset)
-                      Positioned(
-                        top: _topInsetFor(state.mode, showsFrame),
-                        right: 20,
-                        child: const _FullScreenToggle(),
-                      ),
-
-                    // 3. The Global Switcher, clear of the active shell's chrome
-                    OSSwitcherWidget(
-                      bottomInset: _switcherInsetFor(state.mode, showsFrame),
-                    ),
-                  ],
-                ),
-              );
-            },
+          return AnimatedSwitcher(
+            duration: AppMotion.normal,
+            child: _surfaceFor(context, state),
           );
         },
       ),
     );
+  }
+
+  Widget _surfaceFor(BuildContext context, OSModeState state) {
+    if (!state.isInOS) {
+      return const LandingPage(key: ValueKey('landing'));
+    }
+
+    if (state.isBooting) {
+      return BootScreen(
+        key: const ValueKey('boot'),
+        mode: state.mode,
+        onComplete: () => context.read<OSModeCubit>().bootComplete(),
+      );
+    }
+
+    return OSShell(key: ValueKey('os-${state.mode}'), state: state);
+  }
+}
+
+class OSShell extends StatelessWidget {
+  final OSModeState state;
+
+  const OSShell({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final showsFrame = state.showsPhoneFrame;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (showsFrame)
+            _MobileSimulator(mode: state.mode)
+          else
+            buildShell(state.mode),
+
+          // Leave / fullscreen controls, clear of each shell's top chrome.
+          if (!state.isHandset)
+            Positioned(
+              top: _topInsetFor(state.mode, showsFrame),
+              right: 20,
+              child: const Row(
+                children: [
+                  _ExitToPortfolioButton(),
+                  SizedBox(width: AppSpacing.sm),
+                  _FullScreenToggle(),
+                ],
+              ),
+            ),
+
+          OSSwitcherWidget(
+            bottomInset: _switcherInsetFor(state.mode, showsFrame),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget buildShell(OSMode mode) {
+    switch (mode) {
+      case OSMode.windows:
+        return const WindowsDesktop();
+      case OSMode.macos:
+        return const MacDesktop();
+      case OSMode.linux:
+        return const LinuxDesktop();
+      case OSMode.android:
+        return const AndroidLauncher();
+      case OSMode.ios:
+        return const IosLauncher();
+    }
   }
 
   /// Bottom chrome each shell occupies, so the floating switcher never covers
@@ -81,8 +130,6 @@ class MainOrchestrator extends StatelessWidget {
         return 60; // 48px navigation bar
       case OSMode.ios:
         return 116; // 84px dock, offset 20 from the bottom
-      case OSMode.web:
-        return 104; // floating glass dock
       case OSMode.linux:
         return 24; // dock is on the left edge
     }
@@ -99,26 +146,100 @@ class MainOrchestrator extends StatelessWidget {
       case OSMode.windows:
       case OSMode.android:
       case OSMode.ios:
-      case OSMode.web:
         return 24;
     }
   }
+}
 
-  Widget _buildBGLayer(OSMode mode) {
-    switch (mode) {
-      case OSMode.windows:
-        return const WindowsDesktop();
-      case OSMode.macos:
-        return const MacDesktop();
-      case OSMode.linux:
-        return const LinuxDesktop();
-      case OSMode.android:
-        return const AndroidLauncher();
-      case OSMode.ios:
-        return const IosLauncher();
-      case OSMode.web:
-        return const WebLauncher();
+/// Without this the OS shells are a one-way door — there was no way back to
+/// the portfolio once you entered one.
+class _ExitToPortfolioButton extends StatelessWidget {
+  const _ExitToPortfolioButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return _GlassButton(
+      icon: Icons.arrow_back_rounded,
+      tooltip: 'Back to portfolio',
+      onTap: () => context.read<OSModeCubit>().exitToLanding(),
+    );
+  }
+}
+
+class _FullScreenToggle extends StatefulWidget {
+  const _FullScreenToggle();
+
+  @override
+  State<_FullScreenToggle> createState() => _FullScreenToggleState();
+}
+
+class _FullScreenToggleState extends State<_FullScreenToggle> {
+  bool _isFullScreen = false;
+
+  // Uses package:web; dart:html is deprecated and made the app un-compilable
+  // for any non-web target.
+  void _toggleFullScreen() {
+    try {
+      if (_isFullScreen) {
+        web.document.exitFullscreen();
+      } else {
+        web.document.documentElement?.requestFullscreen();
+      }
+      setState(() => _isFullScreen = !_isFullScreen);
+    } catch (e) {
+      debugPrint('Full screen error: $e');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _GlassButton(
+      icon: _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+      tooltip: _isFullScreen ? 'Exit full screen' : 'Full screen',
+      onTap: _toggleFullScreen,
+    );
+  }
+}
+
+class _GlassButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _GlassButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: ClipRRect(
+        borderRadius: AppRadius.pill,
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  borderRadius: AppRadius.pill,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -130,7 +251,7 @@ class _MobileSimulator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: const Color(0xFF0F0F0F),
+      color: AppColors.bg,
       child: Center(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -173,9 +294,7 @@ class _MobileSimulator extends StatelessWidget {
                     ),
                     child: Stack(
                       children: [
-                        mode == OSMode.android
-                            ? const AndroidLauncher()
-                            : const IosLauncher(),
+                        OSShell.buildShell(mode),
                         Align(
                           alignment: Alignment.topCenter,
                           child: Container(
@@ -195,64 +314,6 @@ class _MobileSimulator extends StatelessWidget {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _FullScreenToggle extends StatefulWidget {
-  const _FullScreenToggle();
-
-  @override
-  State<_FullScreenToggle> createState() => _FullScreenToggleState();
-}
-
-class _FullScreenToggleState extends State<_FullScreenToggle> {
-  bool _isFullScreen = false;
-
-  // Uses package:web; dart:html is deprecated and made the app un-compilable
-  // for any non-web target.
-  void _toggleFullScreen() {
-    try {
-      if (_isFullScreen) {
-        web.document.exitFullscreen();
-      } else {
-        web.document.documentElement?.requestFullscreen();
-      }
-      setState(() => _isFullScreen = !_isFullScreen);
-    } catch (e) {
-      debugPrint('Full screen error: $e');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: _isFullScreen ? 'Exit full screen' : 'Full screen',
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: InkWell(
-            onTap: _toggleFullScreen,
-            borderRadius: BorderRadius.circular(30),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Icon(
-                _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
         ),
       ),
     );

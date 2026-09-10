@@ -5,6 +5,7 @@ import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
+import '../../apps/widgets/github_status_widget.dart';
 
 const double _kTopBarHeight = 28;
 const double _kDockWidth = 48;
@@ -99,6 +100,10 @@ class _UbuntuTopBar extends StatelessWidget {
               if (!isNarrow)
                 const NowPlayingWidget(variant: NowPlayingVariant.compact),
               const Spacer(),
+              if (!isNarrow) ...[
+                const GithubStatusWidget(),
+                const SizedBox(width: 10),
+              ],
               const Icon(Icons.wifi, color: Colors.white, size: 14),
               const SizedBox(width: 8),
               const Icon(Icons.battery_std, color: Colors.white, size: 14),
@@ -127,22 +132,22 @@ class _UbuntuDock extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           _DockAppIcon(
+            icon: Icons.grid_view_rounded,
+            color: Colors.white,
+            tooltip: 'Projects',
+            onTap: () => AppLauncherService.launch(context, AppType.projects),
+          ),
+          _DockAppIcon(
             icon: Icons.folder,
             color: Colors.orange,
             tooltip: 'Files',
-            onTap: () => AppLauncherService.launch(context, AppType.projects),
+            onTap: () => AppLauncherService.launch(context, AppType.files),
           ),
           _DockAppIcon(
             icon: Icons.terminal,
             color: Colors.white,
             tooltip: 'Terminal',
             onTap: () => AppLauncherService.launch(context, AppType.terminal),
-          ),
-          _DockAppIcon(
-            icon: Icons.code,
-            color: Colors.lightBlue,
-            tooltip: 'VS Code',
-            onTap: () => AppLauncherService.launch(context, AppType.code),
           ),
           _DockAppIcon(
             icon: Icons.settings,

@@ -62,9 +62,13 @@ class WindowLayer extends StatelessWidget {
                               borderRadius: contentRadius!,
                               child: WindowContentBuilder(
                                 content: window.content,
+                                windowId: window.id,
                               ),
                             )
-                          : WindowContentBuilder(content: window.content),
+                          : WindowContentBuilder(
+                              content: window.content,
+                              windowId: window.id,
+                            ),
                     ),
                 ],
               );

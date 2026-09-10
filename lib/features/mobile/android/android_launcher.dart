@@ -62,6 +62,13 @@ class AndroidLauncher extends StatelessWidget {
                       AppLauncherService.launch(context, AppType.email),
                 ),
                 _AppIcon(
+                  label: 'GitHub',
+                  icon: Icons.code,
+                  color: Colors.white,
+                  onTap: () =>
+                      AppLauncherService.launch(context, AppType.github),
+                ),
+                _AppIcon(
                   label: 'Settings',
                   icon: Icons.settings,
                   color: Colors.grey,

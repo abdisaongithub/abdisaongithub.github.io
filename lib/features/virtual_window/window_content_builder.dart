@@ -3,7 +3,7 @@ import '../apps/widgets/markdown_viewer_app.dart';
 import '../apps/widgets/terminal_app.dart';
 import '../apps/widgets/gallery_app.dart';
 import '../apps/widgets/project_explorer.dart';
-import '../apps/widgets/code_editor_app.dart';
+import '../apps/widgets/projects_app.dart';
 import '../apps/widgets/settings_app.dart';
 import '../apps/widgets/experience_app.dart';
 import 'window_content.dart';
@@ -11,7 +11,15 @@ import 'window_content.dart';
 class WindowContentBuilder extends StatelessWidget {
   final WindowContent content;
 
-  const WindowContentBuilder({super.key, required this.content});
+  /// Id of the window hosting this content, so an app can act on its own
+  /// frame — the terminal's `exit` command closes it.
+  final String windowId;
+
+  const WindowContentBuilder({
+    super.key,
+    required this.content,
+    required this.windowId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,16 +32,16 @@ class WindowContentBuilder extends StatelessWidget {
           title: content.title,
         );
       case WindowContentType.terminal:
-        return const TerminalApp();
+        return TerminalApp(windowId: windowId);
       case WindowContentType.gallery:
         return GalleryApp(
           images: content.data as List<String>? ?? const [],
           title: content.title,
         );
       case WindowContentType.projectDetail:
+        return const ProjectsApp();
+      case WindowContentType.files:
         return const ProjectExplorer();
-      case WindowContentType.code:
-        return const CodeEditorApp();
       case WindowContentType.settings:
         return const SettingsApp();
       case WindowContentType.experience:

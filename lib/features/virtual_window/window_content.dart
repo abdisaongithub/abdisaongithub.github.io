@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 enum WindowContentType {
   profile,
   projectDetail,
+  files,
   skills,
   experience,
   contact,
   webBrowser,
   terminal,
-  code,
   settings,
   markdown,
   gallery,
@@ -22,6 +22,8 @@ extension WindowContentTypeIcon on WindowContentType {
       case WindowContentType.profile:
         return Icons.person_outline;
       case WindowContentType.projectDetail:
+        return Icons.grid_view_rounded;
+      case WindowContentType.files:
         return Icons.folder_open_outlined;
       case WindowContentType.skills:
         return Icons.bolt_outlined;
@@ -33,8 +35,6 @@ extension WindowContentTypeIcon on WindowContentType {
         return Icons.public;
       case WindowContentType.terminal:
         return Icons.terminal;
-      case WindowContentType.code:
-        return Icons.code;
       case WindowContentType.settings:
         return Icons.settings_outlined;
       case WindowContentType.markdown:

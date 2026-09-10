@@ -1,7 +1,12 @@
 # Abdisa Portfolio OS — Project References
 
 ## Overview
-Flutter **web** app that mimics multiple operating systems (Windows 11, macOS, Linux/Ubuntu, Android, iOS) as a portfolio showcase. Also features a "web mode" with a clean glassmorphic landing page. The app demonstrates both past projects and in-app capabilities (virtual file system, terminal, code editor, window manager).
+Flutter **web** portfolio. The **landing page is the default surface**; five OS
+shells (Windows 11, macOS, Ubuntu, Android, iOS) sit behind an explicit "Enter
+the OS" action, with the BIOS animation as the transition into them.
+
+`OSMode.web` no longer exists — the landing page replaced it. Being on the
+landing page is `OSModeState.isInOS == false`.
 
 Web is the only supported target. `main_orchestrator.dart` uses `package:web` directly.
 
@@ -22,15 +27,52 @@ Web is the only supported target. `main_orchestrator.dart` uses `package:web` di
 | `ThemeCubit` | `lib/features/theme/theme_cubit.dart` | Wallpaper selection + dark mode (persisted via SharedPreferences) |
 | `FileSystemCubit` | `lib/features/file_system/cubit/file_system_cubit.dart` | Virtual filesystem: `cd`, `mkdir`, `touch`, tree traversal |
 
+### Design System
+
+**Never hardcode a colour, radius, spacing value or duration.** Everything comes
+from `lib/core/design/tokens.dart` (`AppColors`, `AppSpacing`, `AppRadius`,
+`AppMotion`, `AppText`, `AppDecoration`), and shared widgets live in
+`lib/core/design/ui.dart` (`AppButton`, `AppChip`, `SectionHeading`,
+`ContentShell`, `Hoverable`, `FadeInUp`, `MeshBackdrop`).
+
+`Hoverable` replaces the hand-rolled `_hovering` StatefulWidget that used to be
+copy-pasted into every interactive surface.
+
+### Content You Will Be Asked To Edit
+
+| What | Where |
+|------|-------|
+| Projects | `lib/features/projects/project.dart` → `kProjects` |
+| Skills | same file → `kSkills` |
+| Experience | `lib/features/apps/widgets/experience_app.dart` → `kExperience` (placeholder) |
+| Contact | `lib/core/profile.dart` |
+| Demo video | set `videoId` on a `Project` |
+
+`kProjects` feeds the landing grid, the Projects app **and** the command
+palette. Add once, appears everywhere.
+
+### Media Embeds
+
+Spotify and YouTube run through the providers' official embed iframes, mounted
+as platform views via `lib/core/embed/`. We never rehost media — that would be
+infringement. Logged-out Spotify visitors get the 30s preview.
+
+`dart:ui_web` / `package:web` do not compile on the Dart VM, so these sit behind
+a conditional import (`web_embed_stub.dart` / `web_embed_web.dart`). The same
+rule applies as for `platform_detector.dart`: **import the façade, never the
+web file directly**, or the dependent widget becomes untestable.
+
 ### Feature Modules (all under `lib/features/`)
 | Feature | Description |
 |---------|-------------|
-| `boot/` | `BootScreen` (retro BIOS animation) → `LoginScreen` (GitHub avatar + sign in) |
+| `landing/` | Default surface: nav, hero, projects, skills, OS teaser, contact |
+| `command/` | Ctrl/Cmd-K command palette |
+| `projects/` | Curated project data |
+| `boot/` | `BootScreen` — short BIOS transition into a shell (no login screen) |
 | `desktop/` | `WindowsDesktop`, `MacDesktop`, `LinuxDesktop`, plus shared `DesktopWallpaper` |
 | `mobile/` | `AndroidLauncher` & `IosLauncher` — app grid with status/nav bars |
-| `web/` | `WebLauncher` — glassmorphic landing page with hero section + project grid |
 | `virtual_window/` | `WindowLayer`, `VirtualWindow`, `BaseWindowFrame`, `WindowTaskStrip`, `WindowContentBuilder`, `WindowContent` |
-| `apps/` | Widgets: `TerminalApp`, `CodeEditorApp`, `ProjectExplorer`, `SettingsApp`, `ExperienceApp`, `GalleryApp`, `MarkdownViewerApp`, `GithubStatusWidget`, `NowPlayingWidget` |
+| `apps/` | Widgets: `TerminalApp`, `ProjectsApp`, `ProjectExplorer` (Files), `SettingsApp`, `ExperienceApp`, `GalleryApp`, `MarkdownViewerApp`, `GithubStatusWidget`, `NowPlayingWidget`, `SpotifyPlayer`, `VideoEmbed` |
 | `apps/` | Services: `AppLauncherService` (routes taps to windows/external URLs), `GithubService` (Dio-based GitHub API) |
 | `file_system/` | Virtual FS: `FileNode`, `ProjectManifest` (freezed), `ProjectLoaderService` |
 | `switcher/` | `OSSwitcherWidget` — floating bottom-right OS picker |
@@ -48,6 +90,9 @@ things worth knowing:
 | `detected` | The visitor's real platform — never changes |
 | `isHandset` | Real device is a phone-sized touch screen |
 
+- `isInOS` / `isBooting` — landing vs shell, and the boot transition.
+  `enterOS(mode)` → boot → `bootComplete()`. `exitToLanding()` goes back.
+  `setMode` switches shells **without** replaying the boot.
 - `showsPhoneFrame` — **derived, not stored**: a mobile shell only gets wrapped
   in the simulated handset when `!isHandset`. It used to key off orientation,
   so rotating a real phone wrapped the launcher in a fake phone.
@@ -123,7 +168,7 @@ Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `goo
 - `analysis_options.yaml` — `package:flutter_lints/flutter.yaml`
 - `flutter analyze` must report **no issues** (CI uses `--fatal-infos`)
 - `dart format lib test` before committing, or CI fails
-- `flutter test` — 79 tests covering the filesystem, window manager, OS mode routing, now-playing sizing, asset bundling, and per-shell layout at three viewport widths
+- `flutter test` — 93 tests: filesystem, window manager, OS routing, now-playing sizing, project-data integrity (every link must be absolute https), terminal `exit`, asset bundling, and per-shell layout at three viewport widths
 
 ### Build & Run
 - `flutter run -d chrome` — web dev
@@ -138,3 +183,6 @@ Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `goo
 - Never mutate widget state inside `build()` — hold an id and resolve it, as `CodeEditorApp` does
 - Cubit methods that can fail should **return** an error string rather than logging it
 - OS-specific UI: themed containers mimicking each platform's native look
+- Apps must accept `windowId` if they can act on their own frame (terminal `exit`)
+- `launchUrl` on web: use `webOnlyWindowName: '_blank'`, **never**
+  `LaunchMode.externalApplication` — it gets popup-blocked
