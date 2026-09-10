@@ -135,29 +135,41 @@ class _CommandPaletteState extends State<CommandPalette> {
           hint: mode == osCubit.state.detected ? 'Your platform' : null,
           icon: mode.icon,
           group: 'Operating systems',
-          run: () => osCubit.setMode(mode),
+          // setMode only swaps shells once inside; from the landing page the
+          // OS has to be entered, or nothing visible happens.
+          run: () => osCubit.state.isInOS
+              ? osCubit.setMode(mode)
+              : osCubit.enterOS(mode),
         ),
-      CommandAction(
-        label: 'Open portfolio',
-        icon: Icons.auto_awesome_mosaic_outlined,
-        group: 'Navigation',
-        run: () => windows.openWindow(
-          const WindowContent(
-            title: 'Portfolio — Abdisa Tsegaye',
-            type: WindowContentType.portfolio,
+      // On the landing page the visitor is already looking at the portfolio.
+      if (osCubit.state.isInOS)
+        CommandAction(
+          label: 'Open portfolio',
+          icon: Icons.auto_awesome_mosaic_outlined,
+          group: 'Navigation',
+          run: () => windows.openWindow(
+            const WindowContent(
+              title: 'Portfolio — Abdisa Tsegaye',
+              type: WindowContentType.portfolio,
+            ),
           ),
         ),
-      ),
       CommandAction(
         label: 'Open terminal',
+        hint: osCubit.state.isInOS ? null : 'Enters the OS',
         icon: Icons.terminal_rounded,
         group: 'Navigation',
-        run: () => windows.openWindow(
-          const WindowContent(
-            title: 'Terminal',
-            type: WindowContentType.terminal,
-          ),
-        ),
+        run: () {
+          // Windows only render inside a shell; the terminal is waiting
+          // there once the boot finishes.
+          if (!osCubit.state.isInOS) osCubit.enterDetectedOS();
+          windows.openWindow(
+            const WindowContent(
+              title: 'Terminal',
+              type: WindowContentType.terminal,
+            ),
+          );
+        },
       ),
     ];
   }
@@ -207,78 +219,84 @@ class _CommandPaletteState extends State<CommandPalette> {
             borderRadius: AppRadius.allLg,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                decoration: AppDecoration.panel,
-                child: CallbackShortcuts(
-                  bindings: {
-                    const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
-                        _move(1, actions.length),
-                    const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
-                        _move(-1, actions.length),
-                    const SingleActivator(LogicalKeyboardKey.enter): () =>
-                        _runSelected(actions),
-                    const SingleActivator(LogicalKeyboardKey.escape): () =>
-                        Navigator.of(context).pop(),
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _SearchField(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        onChanged: (value) => setState(() {
-                          _query = value;
-                          _selected = 0;
-                        }),
-                      ),
-                      const Divider(height: 1, color: AppColors.border),
-                      Flexible(
-                        child: actions.isEmpty
-                            ? const _EmptyState()
-                            : ListView.builder(
-                                controller: _scrollController,
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: AppSpacing.sm,
-                                ),
-                                itemCount: actions.length,
-                                itemBuilder: (context, index) {
-                                  final action = actions[index];
-                                  final showGroup = index == 0 ||
-                                      actions[index - 1].group != action.group;
+              // showGeneralDialog, unlike showDialog, supplies no Material,
+              // and TextField refuses to build without one.
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  decoration: AppDecoration.panel,
+                  child: CallbackShortcuts(
+                    bindings: {
+                      const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
+                          _move(1, actions.length),
+                      const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+                          _move(-1, actions.length),
+                      const SingleActivator(LogicalKeyboardKey.enter): () =>
+                          _runSelected(actions),
+                      const SingleActivator(LogicalKeyboardKey.escape): () =>
+                          Navigator.of(context).pop(),
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _SearchField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          onChanged: (value) => setState(() {
+                            _query = value;
+                            _selected = 0;
+                          }),
+                        ),
+                        const Divider(height: 1, color: AppColors.border),
+                        Flexible(
+                          child: actions.isEmpty
+                              ? const _EmptyState()
+                              : ListView.builder(
+                                  controller: _scrollController,
+                                  shrinkWrap: true,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: AppSpacing.sm,
+                                  ),
+                                  itemCount: actions.length,
+                                  itemBuilder: (context, index) {
+                                    final action = actions[index];
+                                    final showGroup = index == 0 ||
+                                        actions[index - 1].group !=
+                                            action.group;
 
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (showGroup)
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                            AppSpacing.md,
-                                            AppSpacing.sm + 4,
-                                            AppSpacing.md,
-                                            AppSpacing.xs,
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        if (showGroup)
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                              AppSpacing.md,
+                                              AppSpacing.sm + 4,
+                                              AppSpacing.md,
+                                              AppSpacing.xs,
+                                            ),
+                                            child: Text(
+                                              action.group.toUpperCase(),
+                                              style: AppText.eyebrow,
+                                            ),
                                           ),
-                                          child: Text(
-                                            action.group.toUpperCase(),
-                                            style: AppText.eyebrow,
-                                          ),
+                                        _CommandRow(
+                                          action: action,
+                                          selected: index == _selected,
+                                          onTap: () {
+                                            setState(() => _selected = index);
+                                            _runSelected(actions);
+                                          },
                                         ),
-                                      _CommandRow(
-                                        action: action,
-                                        selected: index == _selected,
-                                        onTap: () {
-                                          setState(() => _selected = index);
-                                          _runSelected(actions);
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                      ),
-                      const _PaletteFooter(),
-                    ],
+                                      ],
+                                    );
+                                  },
+                                ),
+                        ),
+                        const _PaletteFooter(),
+                      ],
+                    ),
                   ),
                 ),
               ),
