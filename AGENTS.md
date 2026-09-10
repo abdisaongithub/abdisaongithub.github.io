@@ -116,7 +116,7 @@ web file directly**, or the dependent widget becomes untestable.
 | `mobile/` | `AndroidLauncher` & `IosLauncher` — app grid with status/nav bars |
 | `virtual_window/` | `WindowLayer`, `VirtualWindow`, `BaseWindowFrame`, `WindowTaskStrip`, `WindowContentBuilder`, `WindowContent` |
 | `apps/` | Widgets: `TerminalApp`, `ProjectsApp`, `ProjectExplorer` (Files), `SettingsApp`, `ExperienceApp`, `GalleryApp`, `MarkdownViewerApp`, `GithubStatusWidget`, `NowPlayingWidget`, `SpotifyPlayer`, `VideoEmbed` |
-| `apps/` | Services: `AppLauncherService` (routes taps to windows/external URLs), `GithubService` (Dio-based GitHub API) |
+| `apps/` | Services: `AppLauncherService` (routes taps to windows/external URLs), `GithubService` (reads the deploy-time GitHub snapshot) |
 | `file_system/` | Virtual FS: `FileNode`, `ProjectManifest` (freezed), `ProjectLoaderService` |
 | `switcher/` | `OSSwitcherWidget` — floating bottom-right OS picker |
 | `theme/` | `ThemeCubit` + `kOSWallpapers` — the canonical wallpaper map |
@@ -193,11 +193,22 @@ every shell at desktop/laptop/phone widths and fails on any overflow.
 > failure is silent at runtime. `project_loader_service_test.dart` guards this.
 
 ### Key Dependencies (pubspec.yaml)
-`flutter_bloc`, `equatable`, `dio`, `url_launcher`, `web`, `flutter_markdown_plus`, `flutter_highlight`, `cached_network_image`, `shared_preferences`, `uuid`, `freezed` + `json_serializable`.
+`flutter_bloc`, `equatable`, `url_launcher`, `web`, `flutter_markdown_plus`, `flutter_highlight`, `cached_network_image`, `shared_preferences`, `uuid`, `freezed` + `json_serializable`.
 
-`GithubService` is provided through `RepositoryProvider` at the root so widget
-tests can substitute an offline stub; mounting the status widget without one
-fires a live HTTP call and leaves a pending timer.
+### GitHub data — never call api.github.com from the browser
+
+Unauthenticated GitHub API calls are capped at **60/hour per IP**, and visitors
+behind carrier-grade NAT share one IP, so browser-side calls ran out for
+everyone at once and returned 403.
+
+- `tool/fetch_github_snapshot.dart` fetches profile + repos **at deploy time**
+  (CI step "Refresh GitHub snapshot", using `GITHUB_TOKEN`) and writes
+  `assets/data/github_snapshot.json`. If GitHub is unreachable it keeps the
+  committed snapshot, so it never blocks a deploy.
+- `GithubService` only reads that bundled asset. Refresh locally with
+  `GITHUB_TOKEN=$(gh auth token) dart run tool/fetch_github_snapshot.dart`.
+- Stats therefore update on each deploy, not live. Dio was removed with this
+  change; do not re-add a runtime GitHub client.
 
 Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `google_fonts`, `flutter_svg`, `image_picker`, `validators`, and others) was removed; don't add one back without a call site.
 

@@ -67,6 +67,15 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Visitors' browsers never call api.github.com: unauthenticated calls are
+      # capped at 60/hour per IP and shared NAT exhausts that for everyone.
+      # Fetch once here with the workflow token instead. If GitHub is down the
+      # committed snapshot is kept, so this never blocks a deploy.
+      - name: Refresh GitHub snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dart run tool/fetch_github_snapshot.dart
+
       # --wasm serves dart2wasm + skwasm to browsers that support WasmGC and
       # falls back to dart2js + CanvasKit elsewhere. The wasm path is ~0.4 MB
       # smaller gzipped, and CanvasKit is the bulk of the payload.

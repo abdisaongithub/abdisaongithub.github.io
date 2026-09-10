@@ -7,7 +7,7 @@ operating system one click away.
 
 ## Structure
 
-The landing page is the entry point — hero, live GitHub stats, real projects,
+The landing page is the entry point — hero, GitHub stats, real projects,
 skills and contact. It loads fast because the OS is not part of it.
 
 Entering an OS shell is explicit. It boots the platform you are actually
@@ -72,7 +72,7 @@ frame; on an actual phone they render full-bleed, in any orientation.
 - **Projects** — the real work, with links to source and published packages.
 - **Files** — virtual filesystem browser; double-click to open files in the right app.
 - **Markdown viewer**, **Gallery**, **Settings** (wallpaper, theme, OS), **CV**.
-- **GitHub status** — live repo and follower counts, clickable, in every shell.
+- **GitHub status** — repo and follower counts, clickable, in every shell.
 - **Now playing** — adapts to the host chrome: a full card in the Windows
   taskbar, a single line in the macOS/GNOME menu bars, a glyph in phone status
   bars.
@@ -130,7 +130,7 @@ State lives in four cubits, all provided at the root in `lib/main.dart`:
 | `ThemeCubit` | Wallpaper and dark mode, persisted via `SharedPreferences` |
 | `FileSystemCubit` | Immutable `FileNode` tree — `cd`, `ls`, `mkdir`, `touch` |
 | `NowPlayingCubit` | Shared mock playback state for the OS chrome |
-| `GithubCubit` | Live profile and repo data from the GitHub API |
+| `GithubCubit` | Profile and repo stats from the deploy-time snapshot |
 | `SpeedrunCubit` | Scripted tour; drives the other cubits, injectable delays |
 
 Two indirections keep the OS shells decoupled from the apps they host:
