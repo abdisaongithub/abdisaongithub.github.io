@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/live_clock.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
+import '../../apps/now_playing/now_playing_widget.dart';
 import '../../desktop/desktop_wallpaper.dart';
 
 class AndroidLauncher extends StatelessWidget {
@@ -92,13 +94,16 @@ class _AndroidStatusBar extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Icon(Icons.wifi, color: Colors.white, size: 16),
+          // Android surfaces media playback as a status-bar glyph.
+          NowPlayingWidget(variant: NowPlayingVariant.indicator),
+          Spacer(),
+          Icon(Icons.wifi, color: Colors.white, size: 15),
           SizedBox(width: 4),
-          Icon(Icons.battery_full, color: Colors.white, size: 16),
-          SizedBox(width: 4),
-          Text('12:00', style: TextStyle(color: Colors.white, fontSize: 12)),
+          Icon(Icons.battery_full, color: Colors.white, size: 15),
+          SizedBox(width: 6),
+          LiveClock(
+              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.0)),
         ],
       ),
     );

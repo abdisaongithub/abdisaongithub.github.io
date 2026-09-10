@@ -4,7 +4,7 @@ import '../../virtual_window/window_layer.dart';
 import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
-import '../../apps/widgets/spotify_widget.dart';
+import '../../apps/now_playing/now_playing_widget.dart';
 
 const double _kTopBarHeight = 28;
 const double _kDockWidth = 48;
@@ -78,25 +78,39 @@ class _UbuntuTopBar extends StatelessWidget {
     return Container(
       color: Colors.black.withValues(alpha: 0.5),
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: const Row(
-        children: [
-          Text(
-            'Activities',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
-          ),
-          Spacer(),
-          SpotifyWidget(),
-          Spacer(),
-          Icon(Icons.wifi, color: Colors.white, size: 14),
-          SizedBox(width: 8),
-          Icon(Icons.battery_std, color: Colors.white, size: 14),
-          SizedBox(width: 8),
-          Icon(Icons.power_settings_new, color: Colors.white, size: 14),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 560;
+
+          return Row(
+            children: [
+              const Text(
+                'Activities',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  height: 1.0,
+                ),
+              ),
+              const Spacer(),
+              // GNOME centres the now-playing readout; compact keeps it
+              // inside the 28px bar.
+              if (!isNarrow)
+                const NowPlayingWidget(variant: NowPlayingVariant.compact),
+              const Spacer(),
+              const Icon(Icons.wifi, color: Colors.white, size: 14),
+              const SizedBox(width: 8),
+              const Icon(Icons.battery_std, color: Colors.white, size: 14),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.power_settings_new,
+                color: Colors.white,
+                size: 14,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

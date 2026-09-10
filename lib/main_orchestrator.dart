@@ -29,35 +29,32 @@ class MainOrchestrator extends StatelessWidget {
         builder: (context, state) {
           return LayoutBuilder(
             builder: (context, constraints) {
-              final isPortrait = constraints.maxHeight > constraints.maxWidth;
-              final isMobileMode =
-                  state.mode == OSMode.android || state.mode == OSMode.ios;
-
-              // Enforce simulation if:
-              // 1. It's a mobile mode AND user manually selected it.
-              // 2. OR it's a mobile mode AND we are in Landscape.
-              final shouldShowSimulator =
-                  isMobileMode && (state.isManual || !isPortrait);
+              // A real phone always gets the launcher full-bleed; the simulated
+              // handset frame is only for previewing mobile on a bigger screen.
+              final showsFrame = state.showsPhoneFrame;
 
               return Scaffold(
                 body: Stack(
                   children: [
                     // 1. The active OS Content
-                    if (shouldShowSimulator)
+                    if (showsFrame)
                       _MobileSimulator(mode: state.mode)
                     else
                       _buildBGLayer(state.mode),
 
-                    // 2. Full Screen Toggle (Top Right)
-                    if (!isPortrait)
-                      const Positioned(
-                        top: 40,
+                    // 2. Full Screen Toggle (hidden on handsets, where the
+                    //    browser chrome already handles this)
+                    if (!state.isHandset)
+                      Positioned(
+                        top: _topInsetFor(state.mode, showsFrame),
                         right: 20,
-                        child: _FullScreenToggle(),
+                        child: const _FullScreenToggle(),
                       ),
 
-                    // 3. The Global Switcher
-                    const OSSwitcherWidget(),
+                    // 3. The Global Switcher, clear of the active shell's chrome
+                    OSSwitcherWidget(
+                      bottomInset: _switcherInsetFor(state.mode, showsFrame),
+                    ),
                   ],
                 ),
               );
@@ -66,6 +63,45 @@ class MainOrchestrator extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Bottom chrome each shell occupies, so the floating switcher never covers
+  /// the taskbar, dock or navigation bar.
+  static double _switcherInsetFor(OSMode mode, bool showsFrame) {
+    // Inside the simulator the shell's own chrome is within the phone frame,
+    // so the switcher only has to clear the page itself.
+    if (showsFrame) return 24;
+
+    switch (mode) {
+      case OSMode.windows:
+        return 60; // 48px taskbar
+      case OSMode.macos:
+        return 96; // 88px reserved for the dock
+      case OSMode.android:
+        return 60; // 48px navigation bar
+      case OSMode.ios:
+        return 116; // 84px dock, offset 20 from the bottom
+      case OSMode.web:
+        return 104; // floating glass dock
+      case OSMode.linux:
+        return 24; // dock is on the left edge
+    }
+  }
+
+  /// macOS and Ubuntu both own the top strip of the screen.
+  static double _topInsetFor(OSMode mode, bool showsFrame) {
+    if (showsFrame) return 24;
+    switch (mode) {
+      case OSMode.macos:
+        return 36;
+      case OSMode.linux:
+        return 40;
+      case OSMode.windows:
+      case OSMode.android:
+      case OSMode.ios:
+      case OSMode.web:
+        return 24;
+    }
   }
 
   Widget _buildBGLayer(OSMode mode) {

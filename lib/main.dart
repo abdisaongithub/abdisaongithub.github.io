@@ -6,6 +6,8 @@ import 'features/os_mode/cubit/os_mode_cubit.dart';
 import 'features/virtual_window/cubit/window_manager_cubit.dart';
 import 'features/theme/theme_cubit.dart';
 import 'features/file_system/cubit/file_system_cubit.dart';
+import 'features/apps/now_playing/now_playing_cubit.dart';
+import 'features/apps/services/github_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,17 +19,22 @@ class PortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => OSModeCubit()),
-        BlocProvider(create: (_) => WindowManagerCubit()),
-        BlocProvider(create: (_) => ThemeCubit()),
-        BlocProvider(create: (_) => FileSystemCubit()),
-      ],
-      child: const MaterialApp(
-        title: 'Abdisa Portfolio',
-        debugShowCheckedModeBanner: false,
-        home: BootScreen(),
+    return RepositoryProvider(
+      create: (_) => GithubService(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => OSModeCubit()),
+          BlocProvider(create: (_) => WindowManagerCubit()),
+          BlocProvider(create: (_) => ThemeCubit()),
+          BlocProvider(create: (_) => FileSystemCubit()),
+          // One shared playback state for every surface that shows now-playing.
+          BlocProvider(create: (_) => NowPlayingCubit()),
+        ],
+        child: const MaterialApp(
+          title: 'Abdisa Portfolio',
+          debugShowCheckedModeBanner: false,
+          home: BootScreen(),
+        ),
       ),
     );
   }

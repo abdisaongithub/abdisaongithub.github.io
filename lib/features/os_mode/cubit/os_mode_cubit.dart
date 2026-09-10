@@ -1,32 +1,37 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../core/platform_detector.dart';
 import '../os_mode.dart';
 
 part 'os_mode_state.dart';
 
 class OSModeCubit extends Cubit<OSModeState> {
-  OSModeCubit() : super(const OSModeState(OSMode.macos, isManual: false));
+  /// [detect] is injectable so tests can pin a device instead of depending on
+  /// whatever the host reports.
+  OSModeCubit({DeviceProfile Function()? detect})
+      : super(_initialState((detect ?? PlatformDetector.detect)()));
 
-  void setMode(OSMode mode, {bool isManual = true}) {
-    // If switching between mobile modes (e.g. Android -> iOS),
-    // we assume the user wants to maintain the current "native" adaptive state
-    // rather than forcing a manual simulation frame.
-    final isCurrentMobile =
-        state.mode == OSMode.android || state.mode == OSMode.ios;
-    final isNewMobile = mode == OSMode.android || mode == OSMode.ios;
+  static OSModeState _initialState(DeviceProfile device) {
+    return OSModeState(
+      mode: device.osMode,
+      detected: device.osMode,
+      isHandset: device.isHandset,
+    );
+  }
 
-    if (isCurrentMobile && isNewMobile) {
-      // Inherit the current manual state.
-      // If we were in "Native Mode" (isManual: false), keep it false.
-      // If we were in "Simulation Mode" (isManual: true), keep it true (don't lose the frame).
-      isManual = state.isManual;
-    }
+  void setMode(OSMode mode) {
+    if (mode == state.mode) return;
+    emit(state.copyWith(mode: mode, isManual: true));
+  }
 
-    emit(OSModeState(mode, isManual: isManual));
+  /// Returns the visitor to the shell matching their own platform.
+  void resetToDetected() {
+    emit(state.copyWith(mode: state.detected, isManual: false));
   }
 
   void toggleMode() {
     final nextIndex = (state.mode.index + 1) % OSMode.values.length;
-    emit(OSModeState(OSMode.values[nextIndex], isManual: true));
+    setMode(OSMode.values[nextIndex]);
   }
 }

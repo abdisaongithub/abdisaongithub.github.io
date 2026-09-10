@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/profile.dart';
 import '../services/github_service.dart';
 
 class GithubStatusWidget extends StatefulWidget {
   final String username;
-  const GithubStatusWidget({super.key, this.username = Profile.username});
+
+  /// Injectable so widget tests can avoid a live HTTP call, which otherwise
+  /// leaves a pending timer and fails the test.
+  final GithubService? service;
+
+  const GithubStatusWidget({
+    super.key,
+    this.username = Profile.username,
+    this.service,
+  });
 
   @override
   State<GithubStatusWidget> createState() => _GithubStatusWidgetState();
 }
 
 class _GithubStatusWidgetState extends State<GithubStatusWidget> {
-  final _service = GithubService();
+  late final GithubService _service =
+      widget.service ?? context.read<GithubService>();
   Map<String, dynamic>? _stats;
   bool _loading = true;
 

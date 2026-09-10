@@ -11,11 +11,13 @@ Web is the only supported target. `main_orchestrator.dart` uses `package:web` di
 - `lib/main.dart` — `main()` runs `PortfolioApp` with `MultiBlocProvider` providing all 4 cubits
 - `lib/main_orchestrator.dart` — `MainOrchestrator` routes to the correct OS desktop/launcher based on `OSModeCubit` state; also handles the mobile device simulation frame and the fullscreen toggle
 - `lib/core/profile.dart` — **single source of truth** for name, email, phone, and social URLs. Never hardcode contact details anywhere else.
+- `lib/core/platform_detector.dart` — decides the landing shell from the visitor's real platform. The browser probe lives behind a conditional import (`core/platform/platform_probe_{stub,web}.dart`) because `package:web` pulls in `dart:js_interop`, which does not compile on the Dart VM used by `flutter test`. **Anything importing `package:web` directly becomes untestable — go through the probe.**
+- `lib/core/live_clock.dart` — shared clock; no shell should hardcode a time.
 
 ### State Management (flutter_bloc)
 | Cubit | File | Purpose |
 |-------|------|---------|
-| `OSModeCubit` | `lib/features/os_mode/cubit/os_mode_cubit.dart` | Switches between Windows/macOS/Linux/Android/iOS/Web |
+| `OSModeCubit` | `lib/features/os_mode/cubit/os_mode_cubit.dart` | Active shell, plus the `detected` platform and `isHandset` |
 | `WindowManagerCubit` | `lib/features/virtual_window/cubit/window_manager_cubit.dart` | Opens/closes/focuses/minimizes/maximizes/moves/resizes virtual windows |
 | `ThemeCubit` | `lib/features/theme/theme_cubit.dart` | Wallpaper selection + dark mode (persisted via SharedPreferences) |
 | `FileSystemCubit` | `lib/features/file_system/cubit/file_system_cubit.dart` | Virtual filesystem: `cd`, `mkdir`, `touch`, tree traversal |
@@ -28,11 +30,61 @@ Web is the only supported target. `main_orchestrator.dart` uses `package:web` di
 | `mobile/` | `AndroidLauncher` & `IosLauncher` — app grid with status/nav bars |
 | `web/` | `WebLauncher` — glassmorphic landing page with hero section + project grid |
 | `virtual_window/` | `WindowLayer`, `VirtualWindow`, `BaseWindowFrame`, `WindowTaskStrip`, `WindowContentBuilder`, `WindowContent` |
-| `apps/` | Widgets: `TerminalApp`, `CodeEditorApp`, `ProjectExplorer`, `SettingsApp`, `ExperienceApp`, `GalleryApp`, `MarkdownViewerApp`, `GithubStatusWidget`, `SpotifyWidget` |
+| `apps/` | Widgets: `TerminalApp`, `CodeEditorApp`, `ProjectExplorer`, `SettingsApp`, `ExperienceApp`, `GalleryApp`, `MarkdownViewerApp`, `GithubStatusWidget`, `NowPlayingWidget` |
 | `apps/` | Services: `AppLauncherService` (routes taps to windows/external URLs), `GithubService` (Dio-based GitHub API) |
 | `file_system/` | Virtual FS: `FileNode`, `ProjectManifest` (freezed), `ProjectLoaderService` |
 | `switcher/` | `OSSwitcherWidget` — floating bottom-right OS picker |
 | `theme/` | `ThemeCubit` + `kOSWallpapers` — the canonical wallpaper map |
+
+### Platform Detection & Routing
+
+`OSModeCubit` seeds itself from `PlatformDetector.detect()`, so a Windows
+visitor lands on Windows and an iPhone visitor on iOS. State carries three
+things worth knowing:
+
+| Field | Meaning |
+|-------|---------|
+| `mode` | The shell being rendered |
+| `detected` | The visitor's real platform — never changes |
+| `isHandset` | Real device is a phone-sized touch screen |
+
+- `showsPhoneFrame` — **derived, not stored**: a mobile shell only gets wrapped
+  in the simulated handset when `!isHandset`. It used to key off orientation,
+  so rotating a real phone wrapped the launcher in a fake phone.
+- `resetToDetected()` backs the switcher's "Back to <your OS>" row.
+- Injecting `detect:` is how tests pin a device — see `test/support/test_harness.dart`.
+
+### Chrome Insets
+
+Each shell reserves screen edges, and two things must respect them:
+
+| Shell | Chrome | Window insets | Switcher inset |
+|-------|--------|---------------|----------------|
+| Windows | 48px taskbar (bottom) | `bottom: 48` | 60 |
+| macOS | 24px menu bar, 88px dock | `top: 24, bottom: 88` | 96 |
+| Ubuntu | 28px top bar, 48px dock (left) | `top: 28, left: 48` | 24 |
+| Android | 48px nav bar | — | 60 |
+| iOS | 84px dock at offset 20 | — | 116 |
+| Web | floating dock | — | 104 |
+
+`_switcherInsetFor` in `main_orchestrator.dart` owns the right-hand column.
+The switcher used to sit at a fixed 24px and covered every one of these.
+
+### Now Playing
+
+`NowPlayingWidget` has three variants because the host chrome heights differ by
+2x. **Pick by available height, not by preference:**
+
+| Variant | Fits | Used by |
+|---------|------|---------|
+| `full` | >= 44px | Windows taskbar |
+| `compact` | <= 24px | macOS menu bar, GNOME top bar |
+| `indicator` | <= 20px | Android + iOS status bars |
+
+Dropping the `full` card into a 24px menu bar overflows by 17px on every frame.
+`test/features/apps/now_playing_test.dart` pins each variant against the real
+chrome heights, and `test/features/desktop/chrome_layout_test.dart` renders
+every shell at desktop/laptop/phone widths and fails on any overflow.
 
 ### Virtual Window System
 - `WindowContentType` enum: `profile`, `projectDetail`, `skills`, `experience`, `contact`, `webBrowser`, `terminal`, `code`, `settings`, `markdown`, `gallery`. Each has an `.icon` used by taskbars/docks.
@@ -55,6 +107,10 @@ Web is the only supported target. `main_orchestrator.dart` uses `package:web` di
 ### Key Dependencies (pubspec.yaml)
 `flutter_bloc`, `equatable`, `dio`, `url_launcher`, `web`, `flutter_markdown_plus`, `flutter_highlight`, `cached_network_image`, `shared_preferences`, `uuid`, `freezed` + `json_serializable`.
 
+`GithubService` is provided through `RepositoryProvider` at the root so widget
+tests can substitute an offline stub; mounting the status widget without one
+fires a live HTTP call and leaves a pending timer.
+
 Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `google_fonts`, `flutter_svg`, `image_picker`, `validators`, and others) was removed; don't add one back without a call site.
 
 ### CI/CD
@@ -67,7 +123,7 @@ Keep this list tight — a batch of unused packages (`get_it`, `go_router`, `goo
 - `analysis_options.yaml` — `package:flutter_lints/flutter.yaml`
 - `flutter analyze` must report **no issues** (CI uses `--fatal-infos`)
 - `dart format lib test` before committing, or CI fails
-- `flutter test` — 36 tests covering the filesystem, window manager, OS mode, and asset bundling
+- `flutter test` — 79 tests covering the filesystem, window manager, OS mode routing, now-playing sizing, asset bundling, and per-shell layout at three viewport widths
 
 ### Build & Run
 - `flutter run -d chrome` — web dev

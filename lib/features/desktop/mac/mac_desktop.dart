@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/live_clock.dart';
 import '../../virtual_window/base_window_frame.dart';
 import '../../virtual_window/window_layer.dart';
 import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
-import '../../apps/widgets/spotify_widget.dart';
+import '../../apps/now_playing/now_playing_widget.dart';
 import '../desktop_wallpaper.dart';
 
 const double _kMenuBarHeight = 24;
@@ -67,29 +68,55 @@ class _MacMenuBar extends StatelessWidget {
     return Container(
       color: Colors.white.withValues(alpha: 0.15),
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: const Row(
-        children: [
-          Icon(Icons.apple, color: Colors.white, size: 16),
-          SizedBox(width: 16),
-          Text(
-            'Finder',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-          SizedBox(width: 16),
-          Text('File', style: TextStyle(color: Colors.white, fontSize: 13)),
-          SizedBox(width: 12),
-          Text('Edit', style: TextStyle(color: Colors.white, fontSize: 13)),
-          Spacer(),
-          SpotifyWidget(),
-          SizedBox(width: 16),
-          Icon(Icons.wifi, color: Colors.white, size: 14),
-          SizedBox(width: 12),
-          _MenuBarClock(),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 640;
+
+          return Row(
+            children: [
+              const Icon(Icons.apple, color: Colors.white, size: 15),
+              const SizedBox(width: 14),
+              const Text(
+                'Finder',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  height: 1.0,
+                ),
+              ),
+              if (!isNarrow) ...[
+                const SizedBox(width: 16),
+                const Text(
+                  'File',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Edit',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    height: 1.0,
+                  ),
+                ),
+              ],
+              const Spacer(),
+              // Compact: the full card is 44px tall and this bar is 24px.
+              if (!isNarrow) ...[
+                const NowPlayingWidget(variant: NowPlayingVariant.compact),
+                const SizedBox(width: 14),
+              ],
+              const Icon(Icons.wifi, color: Colors.white, size: 14),
+              const SizedBox(width: 12),
+              const LiveClock(showMeridiem: true),
+            ],
+          );
+        },
       ),
     );
   }
@@ -200,54 +227,6 @@ class _DockItem extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Live clock — the menu bar previously showed a hardcoded "9:41 AM".
-class _MenuBarClock extends StatefulWidget {
-  const _MenuBarClock();
-
-  @override
-  State<_MenuBarClock> createState() => _MenuBarClockState();
-}
-
-class _MenuBarClockState extends State<_MenuBarClock> {
-  late DateTime _now;
-
-  @override
-  void initState() {
-    super.initState();
-    _now = DateTime.now();
-    _scheduleTick();
-  }
-
-  void _scheduleTick() {
-    // Wake up exactly on the next minute rather than polling every second.
-    final next = DateTime(
-      _now.year,
-      _now.month,
-      _now.day,
-      _now.hour,
-      _now.minute,
-    ).add(const Duration(minutes: 1));
-
-    Future.delayed(next.difference(DateTime.now()), () {
-      if (!mounted) return;
-      setState(() => _now = DateTime.now());
-      _scheduleTick();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final hour = _now.hour % 12 == 0 ? 12 : _now.hour % 12;
-    final minute = _now.minute.toString().padLeft(2, '0');
-    final suffix = _now.hour < 12 ? 'AM' : 'PM';
-
-    return Text(
-      '$hour:$minute $suffix',
-      style: const TextStyle(color: Colors.white, fontSize: 13),
     );
   }
 }
