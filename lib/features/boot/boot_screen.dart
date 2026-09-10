@@ -1,9 +1,22 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // We will create this next
 
+import '../../core/design/tokens.dart';
+import '../os_mode/os_mode.dart';
+
+/// Boot transition into an OS shell.
+///
+/// This used to be the app's front door, with a login screen behind it — two
+/// full screens between a visitor and any actual content. It now plays only
+/// when someone deliberately enters a shell, and it is short.
 class BootScreen extends StatefulWidget {
-  const BootScreen({super.key});
+  final OSMode mode;
+  final VoidCallback onComplete;
+
+  const BootScreen({
+    super.key,
+    required this.mode,
+    required this.onComplete,
+  });
 
   @override
   State<BootScreen> createState() => _BootScreenState();
@@ -11,120 +24,99 @@ class BootScreen extends StatefulWidget {
 
 class _BootScreenState extends State<BootScreen> {
   final List<String> _logs = [];
-  final ScrollController _scrollController = ScrollController();
 
-  final List<String> _bootSequence = [
-    'BIOS Date 01/25/26 12:35:03 Ver: 1.0.0',
-    'CPU: Flutter Web Engine v3.x',
-    'Memory Test: 640K OK',
-    ' ',
-    'Detecting Primary Master ... Abdisa Portfolio',
-    'Detecting Primary Slave  ... GitHub Projects',
-    'Detecting Secondary Master ... Skills & Experience',
-    ' ',
-    'Booting from local disk...',
-    'Loading Kernel...',
-    'Mounting /home/abdisa...',
-    'Starting System Services...',
-    'Loading UI Framework...',
-    'Initializing Graphics...',
-    'System Ready.',
-    ' ',
-    'Press any key to continue... (Auto-starting in 3s)',
-  ];
+  /// Per-line delay. The old sequence ran 17 lines and took several seconds;
+  /// this is a transition, so it stays under a second in total.
+  static const Duration _lineDelay = Duration(milliseconds: 42);
+
+  List<String> get _sequence => [
+        'ABDISA BIOS v2.0 — ${widget.mode.label}',
+        'CPU: Flutter Web Engine .......... OK',
+        'Memory .......................... OK',
+        'Mounting /home/abdisa ........... OK',
+        'Loading window manager .......... OK',
+        'Starting ${widget.mode.label} ...',
+      ];
 
   @override
   void initState() {
     super.initState();
-    _startBootSequence();
+    _run();
   }
 
-  Future<void> _startBootSequence() async {
-    for (final line in _bootSequence) {
+  Future<void> _run() async {
+    for (final line in _sequence) {
+      await Future<void>.delayed(_lineDelay);
       if (!mounted) return;
-      await Future.delayed(
-          Duration(milliseconds: line.trim().isEmpty ? 50 : 30));
-      setState(() {
-        _logs.add(line);
-      });
-      _scrollToBottom();
+      setState(() => _logs.add(line));
     }
 
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (mounted) {
-      _navigateToLogin();
-    }
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    });
-  }
-
-  void _navigateToLogin() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const LoginScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 200),
-      ),
-    );
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (mounted) widget.onComplete();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Retro Header
-            const Text(
-              'Abdisa BIOS (C) 2026 Energy Star Ally',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Courier',
-                  fontWeight: FontWeight.bold),
-            ),
-            const Divider(color: Colors.white),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _logs.length,
-                itemBuilder: (context, index) {
-                  return Text(
-                    _logs[index],
-                    style: const TextStyle(
-                      color: Color(0xFFCCCCCC), // Retro grey/white
-                      fontFamily: 'Courier',
-                      fontSize: 14,
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Blinking Cursor
-            Row(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('_',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontFamily: 'Courier')),
+                for (final line in _logs)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      line,
+                      style: const TextStyle(
+                        color: Color(0xFF8AE234),
+                        fontFamily: 'monospace',
+                        fontFamilyFallback: ['Consolas', 'Menlo'],
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.sm),
+                const _Cursor(),
               ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _Cursor extends StatefulWidget {
+  const _Cursor();
+
+  @override
+  State<_Cursor> createState() => _CursorState();
+}
+
+class _CursorState extends State<_Cursor> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 620),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(width: 8, height: 15, color: const Color(0xFF8AE234)),
     );
   }
 }

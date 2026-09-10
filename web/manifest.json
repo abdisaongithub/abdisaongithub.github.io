@@ -1,11 +1,11 @@
 {
-    "name": "Abdisa Tsegaye - Portfolio OS",
-    "short_name": "Abdisa OS",
+    "name": "Abdisa Tsegaye - Full-stack Developer",
+    "short_name": "Abdisa T.",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0F0F0F",
-    "theme_color": "#0F0F0F",
-    "description": "An interactive portfolio built as a web-based operating system, with Windows, macOS, Ubuntu, Android and iOS modes.",
+    "background_color": "#08080B",
+    "theme_color": "#08080B",
+    "description": "Portfolio of Abdisa Tsegaye - Flutter apps, TypeScript and Dart backends, and published developer tooling.",
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [

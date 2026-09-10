@@ -6,6 +6,7 @@ import '../../virtual_window/window_task_strip.dart';
 import '../../apps/app_enums.dart';
 import '../../apps/app_launcher_service.dart';
 import '../../apps/now_playing/now_playing_widget.dart';
+import '../../apps/widgets/github_status_widget.dart';
 import '../desktop_wallpaper.dart';
 
 const double _kMenuBarHeight = 24;
@@ -110,6 +111,8 @@ class _MacMenuBar extends StatelessWidget {
               if (!isNarrow) ...[
                 const NowPlayingWidget(variant: NowPlayingVariant.compact),
                 const SizedBox(width: 14),
+                const GithubStatusWidget(),
+                const SizedBox(width: 14),
               ],
               const Icon(Icons.wifi, color: Colors.white, size: 14),
               const SizedBox(width: 12),
@@ -151,22 +154,22 @@ class _MacDock extends StatelessWidget {
             onTap: () => AppLauncherService.launch(context, AppType.cv),
           ),
           _DockItem(
-            icon: Icons.folder,
-            color: Colors.amber,
+            icon: Icons.grid_view_rounded,
+            color: Colors.deepPurple,
             tooltip: 'Projects',
             onTap: () => AppLauncherService.launch(context, AppType.projects),
+          ),
+          _DockItem(
+            icon: Icons.folder,
+            color: Colors.amber,
+            tooltip: 'Files',
+            onTap: () => AppLauncherService.launch(context, AppType.files),
           ),
           _DockItem(
             icon: Icons.terminal,
             color: Colors.black87,
             tooltip: 'Terminal',
             onTap: () => AppLauncherService.launch(context, AppType.terminal),
-          ),
-          _DockItem(
-            icon: Icons.code,
-            color: Colors.lightBlue,
-            tooltip: 'VS Code',
-            onTap: () => AppLauncherService.launch(context, AppType.code),
           ),
           _DockItem(
             icon: Icons.mail,

@@ -9,7 +9,6 @@ const Map<OSMode, String> kOSWallpapers = {
   OSMode.linux: '',
   OSMode.android: 'assets/images/android_wallpaper.jpg',
   OSMode.ios: 'assets/images/ios_wallpaper.jpg',
-  OSMode.web: 'assets/images/macos_wallpaper.png',
 };
 
 // STATE

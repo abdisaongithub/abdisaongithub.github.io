@@ -19,8 +19,8 @@ class EmptyLoader extends ProjectLoaderService {
 /// a pending timer and fails any widget test that mounts the status widget.
 class OfflineGithubService extends GithubService {
   @override
-  Future<Map<String, dynamic>> getUserStats(String username) async => const {};
+  Future<GithubProfile?> getProfile(String username) async => null;
 
   @override
-  Future<List<dynamic>> getRecentCommits(String username) async => const [];
+  Future<List<GithubRepo>> getRepos(String username) async => const [];
 }

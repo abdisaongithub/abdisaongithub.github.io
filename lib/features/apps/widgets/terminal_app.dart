@@ -8,7 +8,10 @@ import '../../virtual_window/cubit/window_manager_cubit.dart';
 import '../../virtual_window/window_content.dart';
 
 class TerminalApp extends StatefulWidget {
-  const TerminalApp({super.key});
+  /// The window this terminal lives in, so `exit` can close it.
+  final String windowId;
+
+  const TerminalApp({super.key, required this.windowId});
 
   @override
   State<TerminalApp> createState() => _TerminalAppState();
@@ -85,7 +88,8 @@ class _TerminalAppState extends State<TerminalApp> {
             '  open <file>  - Open a file in its app\n'
             '  mkdir <name> - Create directory\n'
             '  touch <name> - Create file\n'
-            '  pwd          - Print working directory';
+            '  pwd          - Print working directory\n'
+            '  exit         - Close this terminal';
       case 'about':
         return 'I am ${Profile.name}, a ${Profile.tagline} passionate about '
             'building beautiful UIs.';
@@ -96,6 +100,16 @@ class _TerminalAppState extends State<TerminalApp> {
       case 'clear':
         setState(() => _history.clear());
         return null;
+      case 'exit':
+      case 'quit':
+        // Deferred: closing the window disposes this widget, so it must not
+        // happen while we are still building its output.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.read<WindowManagerCubit>().closeWindow(widget.windowId);
+          }
+        });
+        return 'Closing terminal...';
       case 'ls':
         final children = fsCubit.state.currentDirectory.children;
         if (children == null || children.isEmpty) return '';

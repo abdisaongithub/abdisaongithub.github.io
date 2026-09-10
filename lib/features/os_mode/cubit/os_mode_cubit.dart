@@ -20,9 +20,39 @@ class OSModeCubit extends Cubit<OSModeState> {
     );
   }
 
+  /// Leaves the landing page and boots [mode].
+  ///
+  /// The BIOS animation plays here, as a transition into the shell, rather
+  /// than as a gate in front of the site's actual content.
+  void enterOS(OSMode mode) {
+    emit(
+      state.copyWith(
+        mode: mode,
+        isInOS: true,
+        isBooting: true,
+        isManual: mode != state.detected,
+      ),
+    );
+  }
+
+  void enterDetectedOS() => enterOS(state.detected);
+
+  /// Called by the boot screen once its animation finishes.
+  void bootComplete() {
+    if (!state.isBooting) return;
+    emit(state.copyWith(isBooting: false));
+  }
+
+  /// Returns to the landing page.
+  void exitToLanding() {
+    emit(state.copyWith(isInOS: false, isBooting: false));
+  }
+
+  /// Switches shells while already inside the OS. No boot animation — this is
+  /// a live switch, and replaying the BIOS every time would be tedious.
   void setMode(OSMode mode) {
     if (mode == state.mode) return;
-    emit(state.copyWith(mode: mode, isManual: true));
+    emit(state.copyWith(mode: mode, isManual: mode != state.detected));
   }
 
   /// Returns the visitor to the shell matching their own platform.

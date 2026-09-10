@@ -28,19 +28,19 @@ class AppLauncherService {
           ),
         );
 
+      case AppType.files:
+        windows.openWindow(
+          const WindowContent(
+            title: 'Files',
+            type: WindowContentType.files,
+          ),
+        );
+
       case AppType.terminal:
         windows.openWindow(
           const WindowContent(
             title: 'Terminal',
             type: WindowContentType.terminal,
-          ),
-        );
-
-      case AppType.code:
-        windows.openWindow(
-          const WindowContent(
-            title: 'Visual Studio Code',
-            type: WindowContentType.code,
           ),
         );
 
@@ -85,10 +85,10 @@ class AppLauncherService {
 
   static Future<void> _launchUrl(Uri uri) async {
     try {
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      // On web, LaunchMode.externalApplication is unreliable and gets caught
+      // by popup blockers. platformDefault plus an explicit _blank window name
+      // is what actually opens a new tab.
+      final launched = await launchUrl(uri, webOnlyWindowName: '_blank');
       if (!launched) debugPrint('Could not launch $uri');
     } catch (e) {
       // canLaunchUrl is unreliable on web for mailto/tel, so we attempt the

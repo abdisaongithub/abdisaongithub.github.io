@@ -24,11 +24,70 @@ void main() {
     }
   });
 
+  group('landing first', () {
+    // A recruiter used to hit a BIOS animation and a login screen before any
+    // content. The landing page is now the default surface.
+    test('starts on the landing page, not in an OS shell', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      expect(cubit.state.isInOS, isFalse);
+      expect(cubit.state.isBooting, isFalse);
+      expect(cubit.state.showsPhoneFrame, isFalse);
+    });
+
+    test('entering an OS plays the boot transition', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.macos);
+
+      expect(cubit.state.isInOS, isTrue);
+      expect(cubit.state.isBooting, isTrue);
+      expect(cubit.state.mode, OSMode.macos);
+    });
+
+    test('bootComplete ends the transition and keeps the shell', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.linux);
+      cubit.bootComplete();
+
+      expect(cubit.state.isBooting, isFalse);
+      expect(cubit.state.isInOS, isTrue);
+    });
+
+    test('exitToLanding returns to the portfolio', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.windows);
+      cubit.exitToLanding();
+
+      expect(cubit.state.isInOS, isFalse);
+      expect(cubit.state.isBooting, isFalse);
+    });
+
+    test('switching shells while inside does not replay the boot', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.windows);
+      cubit.bootComplete();
+      cubit.setMode(OSMode.macos);
+
+      expect(cubit.state.isBooting, isFalse);
+      expect(cubit.state.mode, OSMode.macos);
+    });
+  });
+
   group('phone frame', () {
     test('a real Android phone renders full-bleed, not in a frame', () {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.android);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -36,6 +95,7 @@ void main() {
       final cubit = cubitFor(OSMode.ios, isHandset: true);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.ios);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -45,7 +105,7 @@ void main() {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.ios);
+      cubit.enterOS(OSMode.ios);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -53,7 +113,7 @@ void main() {
       final cubit = cubitFor(OSMode.windows);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.android);
+      cubit.enterOS(OSMode.android);
       expect(cubit.state.showsPhoneFrame, isTrue);
 
       cubit.setMode(OSMode.ios);
@@ -65,7 +125,7 @@ void main() {
       addTearDown(cubit.close);
 
       for (final mode in OSMode.values.where((m) => !m.isMobile)) {
-        cubit.setMode(mode);
+        cubit.enterOS(mode);
         expect(cubit.state.showsPhoneFrame, isFalse, reason: '$mode');
       }
     });
@@ -74,7 +134,7 @@ void main() {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.windows);
+      cubit.enterOS(OSMode.windows);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
   });
@@ -107,7 +167,7 @@ void main() {
       addTearDown(cubit.close);
 
       cubit.setMode(OSMode.ios);
-      cubit.setMode(OSMode.web);
+      cubit.setMode(OSMode.windows);
 
       expect(cubit.state.detected, OSMode.linux);
     });
@@ -165,9 +225,7 @@ void main() {
     test('mobile and desktop groupings are correct', () {
       expect(OSMode.android.isMobile, isTrue);
       expect(OSMode.ios.isMobile, isTrue);
-      expect(OSMode.web.isMobile, isFalse);
       expect(OSMode.windows.isDesktop, isTrue);
-      expect(OSMode.web.isDesktop, isFalse);
     });
   });
 }

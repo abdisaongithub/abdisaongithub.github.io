@@ -6,7 +6,8 @@ class Profile {
   const Profile._();
 
   static const String name = 'Abdisa Tsegaye';
-  static const String tagline = 'Flutter Developer';
+  static const String tagline = 'Full-stack developer';
+  static const String location = 'Addis Ababa, Ethiopia';
   static const String username = 'abdisaongithub';
 
   static const String email = 'abdtsegaye@gmail.com';
