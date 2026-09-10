@@ -214,21 +214,23 @@ class ContentShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.gutter(width),
-        vertical: verticalPadding,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: AppSpacing.maxContentWidth,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.gutter(constraints.maxWidth),
+            vertical: verticalPadding,
           ),
-          child: child,
-        ),
-      ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSpacing.maxContentWidth,
+              ),
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 }

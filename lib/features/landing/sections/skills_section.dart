@@ -9,7 +9,12 @@ class SkillsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
+    return LayoutBuilder(
+      builder: (context, constraints) => _build(context, constraints.maxWidth),
+    );
+  }
+
+  Widget _build(BuildContext context, double width) {
     final columns = width < 720 ? 1 : (width < 1080 ? 2 : 4);
 
     return ContentShell(

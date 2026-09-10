@@ -3,6 +3,7 @@ import '../apps/widgets/markdown_viewer_app.dart';
 import '../apps/widgets/terminal_app.dart';
 import '../apps/widgets/gallery_app.dart';
 import '../apps/widgets/project_explorer.dart';
+import '../apps/widgets/portfolio_app.dart';
 import '../apps/widgets/projects_app.dart';
 import '../apps/widgets/settings_app.dart';
 import '../apps/widgets/experience_app.dart';
@@ -26,6 +27,8 @@ class WindowContentBuilder extends StatelessWidget {
     // Exhaustive on purpose: adding a WindowContentType now fails the analyzer
     // instead of silently rendering "Unknown Content" at runtime.
     switch (content.type) {
+      case WindowContentType.portfolio:
+        return const PortfolioApp();
       case WindowContentType.markdown:
         return MarkdownViewerApp(
           content: content.data as String? ?? '',

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 enum WindowContentType {
+  portfolio,
   profile,
   projectDetail,
   files,
@@ -19,6 +20,8 @@ extension WindowContentTypeIcon on WindowContentType {
   /// Icon used to represent an open window in taskbars and docks.
   IconData get icon {
     switch (this) {
+      case WindowContentType.portfolio:
+        return Icons.auto_awesome_mosaic_outlined;
       case WindowContentType.profile:
         return Icons.person_outline;
       case WindowContentType.projectDetail:

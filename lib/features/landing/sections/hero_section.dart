@@ -13,8 +13,12 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
+    return LayoutBuilder(
+      builder: (context, constraints) => _build(context, constraints.maxWidth),
+    );
+  }
 
+  Widget _build(BuildContext context, double width) {
     return ContentShell(
       verticalPadding: width < 600 ? AppSpacing.xxl : AppSpacing.xxxl,
       child: Column(
