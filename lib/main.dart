@@ -12,7 +12,6 @@ import 'features/os_mode/cubit/os_mode_cubit.dart';
 import 'features/speedrun/speedrun_cubit.dart';
 import 'features/theme/theme_cubit.dart';
 import 'features/virtual_window/cubit/window_manager_cubit.dart';
-import 'features/virtual_window/window_content.dart';
 import 'main_orchestrator.dart';
 
 Future<void> main() async {
@@ -86,10 +85,10 @@ class PortfolioApp extends StatelessWidget {
   }
 }
 
-/// Opens the portfolio window on arrival and offers the tour.
+/// Offers the guided tour a beat after the landing page settles.
 ///
-/// The site boots into an OS shell, so without this a visitor would land on an
-/// empty desktop with no indication of where the work is.
+/// Nothing is opened automatically and nothing is forced: the landing page is
+/// already the content, and the tour is an invitation to see the OS.
 class _FirstRun extends StatefulWidget {
   final Widget child;
 
@@ -107,18 +106,8 @@ class _FirstRunState extends State<_FirstRun> {
   }
 
   Future<void> _open() async {
-    // Wait for the boot transition to finish before anything appears.
-    await Future<void>.delayed(const Duration(milliseconds: 700));
-    if (!mounted) return;
-
-    context.read<WindowManagerCubit>().openWindow(
-          const WindowContent(
-            title: 'Portfolio — Abdisa Tsegaye',
-            type: WindowContentType.portfolio,
-          ),
-        );
-
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    // Long enough that it reads as an offer rather than an interruption.
+    await Future<void>.delayed(const Duration(milliseconds: 2200));
     if (!mounted) return;
     context.read<SpeedrunCubit>().offer();
   }

@@ -164,6 +164,12 @@ class SpeedrunCubit extends Cubit<SpeedrunState> {
     );
 
     return [
+      _Step('Booting your operating system', () async {
+        // Entering also downloads the deferred OS bundle; the boot animation
+        // covers it, so wait long enough for both.
+        _osMode.enterDetectedOS();
+        await _delay(const Duration(milliseconds: 2200));
+      }),
       _Step('Opening the portfolio', () async {
         _windows.openWindow(_portfolio);
         await _delay(const Duration(milliseconds: 1400));
@@ -197,6 +203,10 @@ class SpeedrunCubit extends Cubit<SpeedrunState> {
         final id = _idOf(WindowContentType.portfolio);
         if (id != null) _windows.focusWindow(id);
         await _delay(const Duration(milliseconds: 900));
+      }),
+      _Step('Everything is one click away', () async {
+        // Leave them on the portfolio rather than stranded in a shell.
+        await _delay(const Duration(milliseconds: 600));
       }),
     ];
   }

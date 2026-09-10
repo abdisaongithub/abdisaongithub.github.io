@@ -23,27 +23,56 @@ void main() {
       });
     }
 
-    test('the boot transition plays on arrival', () {
+    // The landing page is the entry point, so nothing boots until asked.
+    // Entering also pulls down the deferred OS bundle, which is not a cost
+    // every visitor should pay on arrival.
+    test('starts on the landing page, not booting', () {
       final cubit = cubitFor(OSMode.windows);
       addTearDown(cubit.close);
 
+      expect(cubit.state.isInOS, isFalse);
+      expect(cubit.state.isBooting, isFalse);
+    });
+
+    test('entering an OS plays the boot transition', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.macos);
+
+      expect(cubit.state.isInOS, isTrue);
       expect(cubit.state.isBooting, isTrue);
+      expect(cubit.state.mode, OSMode.macos);
+    });
+
+    test('exitToLanding returns to the portfolio', () {
+      final cubit = cubitFor(OSMode.windows);
+      addTearDown(cubit.close);
+
+      cubit.enterOS(OSMode.windows);
+      cubit.exitToLanding();
+
+      expect(cubit.state.isInOS, isFalse);
+      expect(cubit.state.isBooting, isFalse);
     });
 
     test('bootComplete ends the transition and keeps the shell', () {
       final cubit = cubitFor(OSMode.linux);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.linux);
       cubit.bootComplete();
 
       expect(cubit.state.isBooting, isFalse);
       expect(cubit.state.mode, OSMode.linux);
+      expect(cubit.state.isInOS, isTrue);
     });
 
     test('bootComplete twice is harmless', () {
       final cubit = cubitFor(OSMode.macos);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.macos);
       cubit.bootComplete();
       final settled = cubit.state;
       cubit.bootComplete();
@@ -55,9 +84,10 @@ void main() {
   group('switching', () {
     // The visitor asked to watch another operating system start up, so the
     // BIOS transition replays.
-    test('switching shells replays the boot', () {
+    test('switching shells inside the OS replays the boot', () {
       final cubit = cubitFor(OSMode.windows);
       addTearDown(cubit.close);
+      cubit.enterOS(OSMode.windows);
       cubit.bootComplete();
 
       cubit.setMode(OSMode.macos);
@@ -71,6 +101,7 @@ void main() {
     test('selecting the active mode again is a no-op', () {
       final cubit = cubitFor(OSMode.macos);
       addTearDown(cubit.close);
+      cubit.enterOS(OSMode.macos);
       cubit.bootComplete();
 
       final before = cubit.state;
@@ -105,6 +136,7 @@ void main() {
     test('resetToDetected when already home is a no-op', () {
       final cubit = cubitFor(OSMode.windows);
       addTearDown(cubit.close);
+      cubit.enterOS(OSMode.windows);
       cubit.bootComplete();
 
       final before = cubit.state;
@@ -141,6 +173,7 @@ void main() {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.android);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -148,6 +181,7 @@ void main() {
       final cubit = cubitFor(OSMode.ios, isHandset: true);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.ios);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -157,7 +191,7 @@ void main() {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.ios);
+      cubit.enterOS(OSMode.ios);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
 
@@ -165,7 +199,7 @@ void main() {
       final cubit = cubitFor(OSMode.windows);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.android);
+      cubit.enterOS(OSMode.android);
       expect(cubit.state.showsPhoneFrame, isTrue);
 
       cubit.setMode(OSMode.ios);
@@ -176,6 +210,7 @@ void main() {
       final cubit = cubitFor(OSMode.macos);
       addTearDown(cubit.close);
 
+      cubit.enterOS(OSMode.macos);
       for (final mode in OSMode.values.where((m) => !m.isMobile)) {
         cubit.setMode(mode);
         expect(cubit.state.showsPhoneFrame, isFalse, reason: '$mode');
@@ -186,7 +221,7 @@ void main() {
       final cubit = cubitFor(OSMode.android, isHandset: true);
       addTearDown(cubit.close);
 
-      cubit.setMode(OSMode.windows);
+      cubit.enterOS(OSMode.windows);
       expect(cubit.state.showsPhoneFrame, isFalse);
     });
   });

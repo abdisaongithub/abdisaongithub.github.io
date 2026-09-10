@@ -7,17 +7,30 @@ operating system one click away.
 
 ## Structure
 
-The site boots straight into the visitor's own platform — a Windows visitor
-lands in Windows, an iPhone in iOS. The portfolio opens automatically as a
-window, so the work is on screen within a second rather than something to go
-looking for.
+The landing page is the entry point — hero, live GitHub stats, real projects,
+skills and contact. It loads fast because the OS is not part of it.
 
-Switching shells replays the boot transition, because watching another OS start
-up is the point.
+Entering an OS shell is explicit. It boots the platform you are actually
+running, and the BIOS animation covers the OS code bundle downloading. Once
+inside, switching shells replays the boot, because watching another OS start up
+is the point.
+
+### Performance
+
+Flutter web ships its own rendering engine, so there is a floor of about
+**2.4 MB gzipped** on first paint. Three things keep it near that floor:
+
+- CI builds with `--wasm` (dart2wasm + skwasm, ~0.4 MB smaller gzipped than
+  dart2js + CanvasKit; browsers without WasmGC fall back automatically).
+- The OS surface is a **deferred** library, so a visitor who never opens it
+  never downloads it.
+- `web/index.html` paints the hero in plain HTML/CSS before Flutter starts, so
+  the first seconds show content rather than a blank screen.
 
 ### Speedrun
 
-A ~30 second auto-playing tour is offered on arrival: windows open and drag
+A ~30 second auto-playing tour is offered on the landing page. It boots the OS
+for you, then: windows open and drag
 themselves, the terminal types a real command, the OS switches, and it lands
 back on the work. **Skip** and **Take over** stop it instantly and leave
 everything on screen where it is. The replay button in the top-right runs it
@@ -84,7 +97,7 @@ directly for the fullscreen toggle.
 
 ```bash
 flutter analyze          # must be clean
-flutter test             # 105 tests
+flutter test             # 107 tests
 flutter build web --release --base-href /
 ```
 
@@ -190,6 +203,7 @@ lib/
 └── features/
     ├── landing/sections/      Portfolio sections (render in-window)
     ├── speedrun/              Auto-playing tour
+    ├── os/                    Deferred entry point for all OS-only code
     ├── projects/              Curated project data
     ├── command/               Ctrl-K command palette
     ├── boot/                  BIOS transition into a shell
